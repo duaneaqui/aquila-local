@@ -70,6 +70,8 @@ const clientStatusForm = document.querySelector("#clientStatusForm");
 const clientStatusOutput = document.querySelector("#clientStatusOutput");
 const launchChecklistForm = document.querySelector("#launchChecklistForm");
 const launchChecklistOutput = document.querySelector("#launchChecklistOutput");
+const dataImportForm = document.querySelector("#dataImportForm");
+const dataImportOutput = document.querySelector("#dataImportOutput");
 const signalCanvas = document.querySelector("#signalCanvas");
 
 function escapeHtml(value) {
@@ -97,6 +99,48 @@ function addDays(date, days) {
   const nextDate = new Date(date);
   nextDate.setDate(nextDate.getDate() + days);
   return nextDate;
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let quoted = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+
+    if (quoted) {
+      if (char === '"' && next === '"') {
+        field += '"';
+        index += 1;
+      } else if (char === '"') {
+        quoted = false;
+      } else {
+        field += char;
+      }
+    } else if (char === '"') {
+      quoted = true;
+    } else if (char === ",") {
+      row.push(field);
+      field = "";
+    } else if (char === "\n") {
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = "";
+    } else if (char !== "\r") {
+      field += char;
+    }
+  }
+
+  if (field || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
+
+  return rows.filter((csvRow) => csvRow.some((cell) => cell.trim()));
 }
 
 function sentimentClass(sentiment) {
@@ -1300,6 +1344,89 @@ if (launchChecklistForm && launchChecklistOutput) launchChecklistForm.addEventLi
       <p>${concern}</p>
       <h4>Tracker note</h4>
       <pre class="csv-output">${escapeHtml(`SOP ${formatDate(new Date())}: stage=${stageLabels[stage]}; verdict=${verdict}; missing=${missing.length ? missing.join("; ") : "none"}; next=${nextAction}`)}</pre>
+    </div>
+  `;
+});
+
+if (dataImportForm && dataImportOutput) dataImportForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(dataImportForm);
+  const requestedType = data.get("dataType");
+  const rows = parseCsv(String(data.get("csvText") || ""));
+  const headers = rows[0]?.map((header) => header.trim()) || [];
+  const records = rows.slice(1).map((row) => Object.fromEntries(headers.map((header, index) => [header, row[index] || ""])));
+  const headerSet = new Set(headers);
+  const detectedType = requestedType !== "auto"
+    ? requestedType
+    : headerSet.has("next_follow_up")
+      ? "prospects"
+      : headerSet.has("gbp_access")
+        ? "clients"
+        : headerSet.has("payment_method")
+          ? "invoices"
+          : "unknown";
+  const today = formatDate(new Date());
+  const actions = [];
+  const warnings = [];
+  let nextTool = "Founder Daily Dashboard";
+
+  if (!headers.length || !records.length) {
+    warnings.push("No usable data rows found. Paste the header row plus at least one tracker row.");
+  } else if (detectedType === "prospects") {
+    const dueFollowUps = records.filter((record) => record.next_follow_up && record.next_follow_up <= today && !String(record.close_status).toLowerCase().includes("closed"));
+    const auditReady = records.filter((record) => String(record.status).toLowerCase().includes("sample audit") || String(record.audit_status).toLowerCase().includes("needed"));
+    const openHigh = records.filter((record) => ["High", "Medium"].includes(record.priority) && !String(record.close_status).toLowerCase().includes("closed"));
+    actions.push(`${dueFollowUps.length} follow-up${dueFollowUps.length === 1 ? "" : "s"} due today or earlier.`);
+    actions.push(`${auditReady.length} prospect${auditReady.length === 1 ? "" : "s"} ready for a sample audit or audit follow-up.`);
+    actions.push(`${openHigh.length} high/medium open prospect${openHigh.length === 1 ? "" : "s"} in this paste.`);
+    nextTool = dueFollowUps.length ? "Follow-Up Desk" : auditReady.length ? "Sample Audit Generator v2" : "Prospect Entry + Prospect Score";
+  } else if (detectedType === "clients") {
+    const blocked = records.filter((record) => /pending|waiting|blocked|paused/i.test(`${record.gbp_access} ${record.status} ${record.notes}`));
+    const active = records.filter((record) => /active|ready/i.test(record.status));
+    actions.push(`${blocked.length} client location${blocked.length === 1 ? "" : "s"} blocked or waiting on access/status.`);
+    actions.push(`${active.length} client location${active.length === 1 ? "" : "s"} active or ready for a batch.`);
+    nextTool = blocked.length ? "Client Status Tracker" : active.length ? "Fulfillment Batch Builder" : "First Client Onboarding Builder";
+  } else if (detectedType === "invoices") {
+    const unpaid = records.filter((record) => !/paid/i.test(record.status));
+    const overdue = records.filter((record) => /overdue/i.test(record.status));
+    const draft = records.filter((record) => /draft/i.test(record.status));
+    actions.push(`${unpaid.length} unpaid invoice${unpaid.length === 1 ? "" : "s"} in this paste.`);
+    actions.push(`${overdue.length} overdue invoice${overdue.length === 1 ? "" : "s"} needing follow-up.`);
+    actions.push(`${draft.length} draft invoice${draft.length === 1 ? "" : "s"} to send or complete.`);
+    nextTool = overdue.length || unpaid.length ? "Client Status Tracker" : "First Client Onboarding Builder";
+  } else {
+    warnings.push("Tracker type could not be detected. Use one of the known tracker headers or choose the type manually.");
+  }
+
+  const rowNames = records.slice(0, 6).map((record) => record.agency_name || record.client_business || record.invoice_id || "Unnamed row");
+  const summaryNote = `Import ${formatDate(new Date())}: type=${detectedType}; rows=${records.length}; next_tool=${nextTool}; actions=${actions.join(" ")}`;
+
+  dataImportOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">Import action summary</span>
+      <button class="tool-button" type="button" data-copy-target="dataImportOutput">Copy Summary</button>
+    </div>
+    <div class="copy-document">
+      <div class="score-meter compact-meter">
+        <strong>${records.length}</strong>
+        <span>${detectedType} rows</span>
+      </div>
+      <h4>Tracker import summary</h4>
+      <p><strong>Detected type:</strong> ${detectedType}. <strong>Use next:</strong> ${nextTool}.</p>
+      <h4>Actions found</h4>
+      <ul>
+        ${actions.length ? actions.map((action) => `<li>${action}</li>`).join("") : "<li>No action summary available for this data.</li>"}
+      </ul>
+      <h4>Rows sampled</h4>
+      <ul>
+        ${rowNames.length ? rowNames.map((name) => `<li>${escapeHtml(name)}</li>`).join("") : "<li>No named rows found.</li>"}
+      </ul>
+      <h4>Warnings</h4>
+      <ul>
+        ${warnings.length ? warnings.map((warning) => `<li>${warning}</li>`).join("") : "<li>No import warnings.</li>"}
+      </ul>
+      <h4>Tracker note</h4>
+      <pre class="csv-output">${escapeHtml(summaryNote)}</pre>
     </div>
   `;
 });

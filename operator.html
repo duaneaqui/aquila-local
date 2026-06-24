@@ -1017,6 +1017,48 @@ same-week exterior cleaning openings</textarea>
         </div>
       </section>
 
+      <section id="data-import" class="section score-section">
+        <div class="section-heading">
+          <p class="eyebrow">Data import helper</p>
+          <h2>Paste tracker rows and see what needs action.</h2>
+          <p>
+            Use this with rows from the prospect, client-location, or invoice trackers. It summarizes the work queue without making you read every CSV column by hand.
+          </p>
+        </div>
+
+        <div class="data-builder">
+          <form class="mini-form" id="dataImportForm">
+            <h3>Tracker Import</h3>
+            <label>
+              Data type
+              <select name="dataType">
+                <option value="auto">Auto detect</option>
+                <option value="prospects">Prospect tracker</option>
+                <option value="clients">Client locations</option>
+                <option value="invoices">Invoice tracker</option>
+              </select>
+            </label>
+            <label>
+              CSV rows
+              <textarea name="csvText" rows="9" required>agency_name,website,owner_or_contact,role,email,linkedin,agency_type,niche_focus,target_client_type,email_source,score,priority,status,first_email_date,follow_up_1_date,follow_up_2_date,last_touch_date,next_follow_up,audit_status,audit_niche,reply_status,close_status,notes
+BrightRoute Media,https://example-agency.com,Jordan,Owner,jordan@example-agency.com,,Local SEO,Home services,pressure washing,Website contact page,86,High,Sample audit ready,,,,,,Drafted,pressure washing,Not sent,Open,Replace sample row before outreach</textarea>
+            </label>
+            <button class="primary-button form-button" type="submit">Analyze Rows</button>
+          </form>
+
+          <article class="tool-output" id="dataImportOutput" aria-live="polite">
+            <div class="output-actions">
+              <span class="report-label">Import action summary</span>
+              <button class="tool-button" type="button" data-copy-target="dataImportOutput">Copy Summary</button>
+            </div>
+            <div class="copy-document">
+              <h4>Tracker Import Summary</h4>
+              <p>Paste CSV rows to identify follow-ups, blocked clients, unpaid invoices, and the next internal tool to use.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="pricing" class="section pricing-section">
         <div class="section-heading">
           <p class="eyebrow">Simple pricing</p>
