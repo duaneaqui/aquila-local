@@ -605,6 +605,66 @@ h1 {
   background: #fbfcfa;
 }
 
+.compare-section {
+  background: #eef5f0;
+}
+
+.risk-section {
+  background: #f7faf8;
+}
+
+.compare-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(18px, 4vw, 34px);
+}
+
+.compare-card,
+.risk-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 12px 30px rgba(20, 34, 29, 0.06);
+}
+
+.compare-card {
+  padding: clamp(22px, 4vw, 34px);
+}
+
+.featured-compare {
+  border-color: rgba(18, 115, 91, 0.32);
+  background: var(--mint);
+}
+
+.compare-card ul {
+  display: grid;
+  gap: 12px;
+  padding-left: 20px;
+  color: var(--muted);
+  line-height: 1.58;
+}
+
+.risk-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 3vw, 24px);
+}
+
+.risk-card {
+  display: grid;
+  align-content: start;
+  min-height: 210px;
+  padding: 20px;
+}
+
+.risk-card h3 {
+  margin-bottom: 10px;
+  font-size: 1.15rem;
+}
+
+.risk-card p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 .sample-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(16px, 3vw, 28px);
@@ -1028,6 +1088,7 @@ h1 {
 
   .signal-strip,
   .split-section,
+  .compare-grid,
   .folder-shell,
   .dashboard-shell,
   .founder-dashboard,
@@ -1044,6 +1105,7 @@ h1 {
   .fulfill-grid,
   .pricing-grid,
   .sample-grid,
+  .risk-grid,
   .report-preview {
     grid-template-columns: 1fr;
   }
