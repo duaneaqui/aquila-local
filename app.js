@@ -822,23 +822,85 @@ if (intakeForm && intakeOutput) intakeForm.addEventListener("submit", (event) =>
   event.preventDefault();
   const data = new FormData(intakeForm);
   const agency = escapeHtml(data.get("agency"));
+  const contact = escapeHtml(data.get("contact"));
   const client = escapeHtml(data.get("client"));
+  const businessType = escapeHtml(data.get("businessType"));
   const owner = escapeHtml(data.get("owner"));
+  const reportRecipient = escapeHtml(data.get("reportRecipient"));
+  const packageName = escapeHtml(data.get("package"));
+  const locations = Number(data.get("locations"));
   const tone = escapeHtml(data.get("tone"));
   const threshold = escapeHtml(data.get("threshold"));
+  const gbpAccess = escapeHtml(data.get("gbpAccess"));
+  const amountMap = {
+    "Founding Agency Pilot": 199,
+    "Review Desk": 299,
+    "Additional Location": 89
+  };
+  const amount = amountMap[data.get("package")] || 199;
+  const today = formatDate(new Date());
+  const invoiceId = `INV-${today.replaceAll("-", "")}-${agency.replace(/[^A-Za-z0-9]/g, "").slice(0, 6).toUpperCase() || "CLIENT"}`;
+  const serviceScope = packageName === "Additional Location"
+    ? "additional active client location for the current service month"
+    : packageName === "Review Desk"
+      ? `monthly white-label reputation operations desk for up to ${Math.max(locations, 1)} active location${locations === 1 ? "" : "s"}`
+      : `30-day white-label reputation operations pilot for up to ${Math.max(locations, 1)} active location${locations === 1 ? "" : "s"}`;
+  const clientLocationRow = [
+    agency,
+    client,
+    businessType,
+    gbpAccess,
+    owner,
+    tone,
+    threshold,
+    reportRecipient,
+    "Onboarding",
+    `Package: ${packageName}. Payment and intake required before fulfillment.`
+  ].map(csvField).join(",");
+  const invoiceRow = [
+    invoiceId,
+    agency,
+    client,
+    packageName,
+    amount,
+    "Draft",
+    today,
+    "",
+    "PayPal Invoice",
+    "PayPal account on file",
+    "",
+    `Send before work starts. ${serviceScope}.`
+  ].map(csvField).join(",");
 
   intakeOutput.innerHTML = `
     <div class="output-actions">
-      <span class="report-label">Client intake checklist</span>
+      <span class="report-label">First client onboarding pack</span>
       <button class="tool-button" type="button" data-copy-target="intakeOutput">Copy Intake</button>
     </div>
     <div class="copy-document">
-      <h4>Aquila Local Pilot Intake</h4>
+      <h4>Aquila Local First Client Onboarding</h4>
       <p><strong>Agency:</strong> ${agency}</p>
       <p><strong>Client:</strong> ${client}</p>
+      <p><strong>Package:</strong> ${packageName} for $${amount}.00 USD</p>
       <p><strong>Approval owner:</strong> ${owner}</p>
       <p><strong>Brand tone:</strong> ${tone}</p>
       <p><strong>Escalation rule:</strong> ${threshold}</p>
+      <h4>Invoice prep</h4>
+      <ul>
+        <li><strong>Invoice ID:</strong> ${invoiceId}</li>
+        <li><strong>Title:</strong> Aquila Local - ${packageName}</li>
+        <li><strong>Amount:</strong> $${amount}.00 USD</li>
+        <li><strong>Terms:</strong> Due on receipt. Work begins after payment and intake details are received.</li>
+        <li><strong>Description:</strong> ${serviceScope}. Includes Google review reply drafts, four Google profile post drafts per location, one monthly activity report, and escalation notes for risky reviews.</li>
+      </ul>
+      <h4>Welcome email</h4>
+      <p>Subject: ${client} setup for Aquila Local</p>
+      <p>Hi ${contact},</p>
+      <p>Great, I will prepare the ${packageName.toLowerCase()} for ${client}. I will send the PayPal invoice first, and work begins after payment and intake details are received.</p>
+      <p>For setup, please send the Google Business Profile manager access or a recent review export, the approved brand tone, service areas, key offers, preferred website link, and any phrases the client wants us to avoid.</p>
+      <p>Risky reviews under the escalation rule will be flagged for approval before any public reply is used.</p>
+      <p>Best,<br>Duane</p>
+      <h4>Access and intake checklist</h4>
       <ul>
         <li>Confirm Google Business Profile manager access or review export workflow.</li>
         <li>Confirm the client business authorized this work and keeps owner access.</li>
@@ -848,6 +910,18 @@ if (intakeForm && intakeOutput) intakeForm.addEventListener("submit", (event) =>
         <li>Confirm four monthly Google profile post draft topics.</li>
         <li>Confirm report recipient, reporting date, and agency branding requirements.</li>
       </ul>
+      <h4>First-week delivery plan</h4>
+      <ul>
+        <li>Day 0: invoice sent and tracker rows created.</li>
+        <li>Day 1: payment confirmed, intake reviewed, style profile drafted.</li>
+        <li>Day 2: first review reply batch drafted and risky reviews flagged.</li>
+        <li>Day 3: four Google profile post topics drafted for agency approval.</li>
+        <li>Day 5: send first short status update to the agency.</li>
+      </ul>
+      <h4>client-locations.csv row</h4>
+      <pre class="csv-output">${escapeHtml(clientLocationRow)}</pre>
+      <h4>invoice-tracker.csv row</h4>
+      <pre class="csv-output">${escapeHtml(invoiceRow)}</pre>
     </div>
   `;
 });

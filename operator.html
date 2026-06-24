@@ -661,18 +661,42 @@
 
         <div class="onboard-builder">
           <form class="mini-form intake-form" id="intakeForm">
-            <h3>Client Intake Builder</h3>
+            <h3>First Client Onboarding Builder</h3>
             <label>
               Agency name
               <input name="agency" type="text" value="BrightRoute Media" required>
+            </label>
+            <label>
+              Agency contact first name
+              <input name="contact" type="text" value="Jordan" required>
             </label>
             <label>
               Client business
               <input name="client" type="text" value="Northline Pressure Washing" required>
             </label>
             <label>
+              Business type
+              <input name="businessType" type="text" value="pressure washing" required>
+            </label>
+            <label>
               Approval owner
               <input name="owner" type="text" value="Jordan from BrightRoute" required>
+            </label>
+            <label>
+              Report recipient email
+              <input name="reportRecipient" type="email" value="jordan@example-agency.com" required>
+            </label>
+            <label>
+              Package
+              <select name="package">
+                <option value="Founding Agency Pilot">Founding Agency Pilot - $199</option>
+                <option value="Review Desk">Review Desk - $299</option>
+                <option value="Additional Location">Additional Location - $89</option>
+              </select>
+            </label>
+            <label>
+              Location count
+              <input name="locations" type="number" min="1" max="10" value="1" required>
             </label>
             <label>
               Brand tone
@@ -690,19 +714,29 @@
                 <option>refund, safety, legal, or privacy mentions</option>
               </select>
             </label>
-            <button class="primary-button form-button" type="submit">Build Intake</button>
+            <label>
+              Google profile status
+              <select name="gbpAccess">
+                <option>Manager access pending</option>
+                <option>Agency will send review exports</option>
+                <option>Manager access granted</option>
+                <option>Waiting for client authorization</option>
+              </select>
+            </label>
+            <button class="primary-button form-button" type="submit">Build Onboarding Pack</button>
           </form>
 
           <article class="tool-output intake-output" id="intakeOutput">
             <div class="output-actions">
-              <span class="report-label">Client intake checklist</span>
+              <span class="report-label">First client onboarding pack</span>
               <button class="tool-button" type="button" data-copy-target="intakeOutput">Copy Intake</button>
             </div>
             <div class="copy-document">
-              <h4>Aquila Local Pilot Intake</h4>
+              <h4>Aquila Local First Client Onboarding</h4>
               <p><strong>Agency:</strong> BrightRoute Media</p>
               <p><strong>Client:</strong> Northline Pressure Washing</p>
               <ul>
+                <li>Create PayPal invoice before fulfillment begins.</li>
                 <li>Confirm Google Business Profile manager access or review export workflow.</li>
                 <li>Confirm the client business authorized this work and keeps owner access.</li>
                 <li>Do not request or store client passwords.</li>
