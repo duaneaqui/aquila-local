@@ -153,8 +153,80 @@
 
       <section id="dashboard" class="section dashboard-section">
         <div class="section-heading">
-          <p class="eyebrow">Operator dashboard</p>
-          <h2>Run the service from one screen.</h2>
+          <p class="eyebrow">Founder daily dashboard</p>
+          <h2>Open this first and know exactly what to do.</h2>
+          <p>
+            Enter today&apos;s numbers, then follow the generated priority list. This keeps the business focused on revenue, delivery, and stopping at the right time.
+          </p>
+        </div>
+
+        <div class="founder-dashboard">
+          <form class="mini-form founder-form" id="dailyDashboardForm">
+            <h3>Today&apos;s inputs</h3>
+            <label>
+              Work mode
+              <select name="mode">
+                <option value="sales">Sales day</option>
+                <option value="fulfillment">Fulfillment day</option>
+                <option value="mixed">Mixed day</option>
+              </select>
+            </label>
+            <label>
+              Hours available
+              <input name="hours" type="number" min="1" max="12" value="4" required>
+            </label>
+            <label>
+              Prospects researched today
+              <input name="prospects" type="number" min="0" value="12" required>
+            </label>
+            <label>
+              High/strong-medium prospects found
+              <input name="qualified" type="number" min="0" value="4" required>
+            </label>
+            <label>
+              Sample audits ready
+              <input name="audits" type="number" min="0" value="1" required>
+            </label>
+            <label>
+              Emails sent today
+              <input name="emails" type="number" min="0" value="5" required>
+            </label>
+            <label>
+              Follow-ups due today
+              <input name="followUps" type="number" min="0" value="3" required>
+            </label>
+            <label>
+              Onboarding or invoice tasks
+              <input name="onboarding" type="number" min="0" value="0" required>
+            </label>
+            <label>
+              Fulfillment batches due
+              <input name="fulfillment" type="number" min="0" value="0" required>
+            </label>
+            <button class="primary-button form-button" type="submit">Build Daily Plan</button>
+          </form>
+
+          <article class="tool-output founder-output" id="dailyDashboardOutput" aria-live="polite">
+            <div class="output-actions">
+              <span class="report-label">Founder command plan</span>
+              <button class="tool-button" type="button" data-copy-target="dailyDashboardOutput">Copy Plan</button>
+            </div>
+            <div class="copy-document">
+              <h3>Today&apos;s default plan</h3>
+              <p>Protect paid work first, then follow-ups, then new prospects. Stop building features unless a paid client or live buyer requires it.</p>
+              <ul>
+                <li>Clear follow-ups that are due today.</li>
+                <li>Research and score enough agencies to keep the tracker moving.</li>
+                <li>Create sample audits only for high or strong-medium prospects.</li>
+                <li>Stop after the planned work block unless a buyer replies.</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+
+        <div class="section-heading compact-heading">
+          <p class="eyebrow">Operations preview</p>
+          <h2>Review queue, agents, and reports.</h2>
         </div>
 
         <div class="dashboard-shell">

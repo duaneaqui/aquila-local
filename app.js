@@ -48,6 +48,8 @@ const agentGrid = document.querySelector("#agentGrid");
 const refreshQueue = document.querySelector("#refreshQueue");
 const buildReport = document.querySelector("#buildReport");
 const reportPreview = document.querySelector("#reportPreview");
+const dailyDashboardForm = document.querySelector("#dailyDashboardForm");
+const dailyDashboardOutput = document.querySelector("#dailyDashboardOutput");
 const prospectEntryForm = document.querySelector("#prospectEntryForm");
 const prospectEntryOutput = document.querySelector("#prospectEntryOutput");
 const scoreForm = document.querySelector("#scoreForm");
@@ -272,6 +274,96 @@ if (buildReport && reportPreview) buildReport.addEventListener("click", () => {
     <div>
       <span class="report-label">Risk flags</span>
       <strong>7</strong>
+    </div>
+  `;
+});
+
+if (dailyDashboardForm && dailyDashboardOutput) dailyDashboardForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(dailyDashboardForm);
+  const mode = data.get("mode");
+  const hours = Number(data.get("hours"));
+  const prospects = Number(data.get("prospects"));
+  const qualified = Number(data.get("qualified"));
+  const audits = Number(data.get("audits"));
+  const emails = Number(data.get("emails"));
+  const followUps = Number(data.get("followUps"));
+  const onboarding = Number(data.get("onboarding"));
+  const fulfillment = Number(data.get("fulfillment"));
+  const prospectTarget = 30;
+  const qualifiedTarget = 8;
+  const auditTarget = 3;
+  const emailTarget = hours <= 3 ? 10 : 15;
+  const blockers = [];
+  const priorities = [];
+  const stopList = [
+    "Do not build new features today unless a live buyer or paid client requires it.",
+    "Do not contact regulated niches first.",
+    "Do not promise rankings, review growth, removal of bad reviews, or fake urgency."
+  ];
+
+  if (fulfillment > 0) priorities.push(`Complete ${fulfillment} fulfillment batch${fulfillment === 1 ? "" : "es"} before new outreach.`);
+  if (onboarding > 0) priorities.push(`Clear ${onboarding} onboarding/invoice task${onboarding === 1 ? "" : "s"} so paid work can start.`);
+  if (followUps > 0) priorities.push(`Send ${followUps} due follow-up${followUps === 1 ? "" : "s"} before researching new agencies.`);
+  if (audits < auditTarget && qualified > audits) priorities.push(`Build ${Math.min(auditTarget - audits, qualified - audits)} more sample audit${Math.min(auditTarget - audits, qualified - audits) === 1 ? "" : "s"} from qualified prospects.`);
+  if (emails < emailTarget) priorities.push(`Send ${emailTarget - emails} more personalized email${emailTarget - emails === 1 ? "" : "s"} after audits/follow-ups are ready.`);
+  if (qualified < qualifiedTarget) priorities.push(`Find ${qualifiedTarget - qualified} more high or strong-medium prospect${qualifiedTarget - qualified === 1 ? "" : "s"}.`);
+  if (prospects < prospectTarget) priorities.push(`Research ${prospectTarget - prospects} more agenc${prospectTarget - prospects === 1 ? "y" : "ies"} only after follow-ups and paid tasks are handled.`);
+
+  if (!priorities.length) priorities.push("Today is complete enough. Update trackers, record lessons, and stop.");
+  if (mode === "fulfillment" && fulfillment === 0) blockers.push("Fulfillment mode selected, but no fulfillment batches are due. Switch to follow-ups or sales unless a client message is waiting.");
+  if (mode === "sales" && (fulfillment > 0 || onboarding > 0)) blockers.push("Sales mode selected, but paid/onboarding work exists. Finish paid work first.");
+  if (hours > 8) blockers.push("Work block is over 8 hours. Cap the day unless a buyer conversation or paid onboarding task is active.");
+
+  const score = Math.max(0, Math.min(100,
+    Math.round(
+      (Math.min(prospects, prospectTarget) / prospectTarget) * 20
+      + (Math.min(qualified, qualifiedTarget) / qualifiedTarget) * 25
+      + (Math.min(audits, auditTarget) / auditTarget) * 20
+      + (Math.min(emails, emailTarget) / emailTarget) * 20
+      + (followUps === 0 ? 10 : 0)
+      + (fulfillment === 0 && onboarding === 0 ? 5 : 0)
+    )
+  ));
+  const modeLabel = mode === "sales" ? "Sales day" : mode === "fulfillment" ? "Fulfillment day" : "Mixed day";
+  const nextTool = fulfillment > 0
+    ? "Fulfillment Batch Builder"
+    : onboarding > 0
+      ? "First Client Onboarding Builder"
+      : followUps > 0
+        ? "Follow-Up Desk"
+        : audits < auditTarget && qualified > audits
+          ? "Sample Audit Generator v2"
+          : emails < emailTarget
+            ? "Follow-Up Desk or outreach templates"
+            : "Prospect Entry + Prospect Score";
+
+  dailyDashboardOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">Founder command plan</span>
+      <button class="tool-button" type="button" data-copy-target="dailyDashboardOutput">Copy Plan</button>
+    </div>
+    <div class="copy-document">
+      <div class="score-meter compact-meter">
+        <strong>${score}</strong>
+        <span>${modeLabel}</span>
+      </div>
+      <h3>Today&apos;s command plan</h3>
+      <p><strong>Use next:</strong> ${nextTool}. <strong>Time cap:</strong> ${Math.min(hours, 8)} focused hour${Math.min(hours, 8) === 1 ? "" : "s"}.</p>
+      <h4>Priority order</h4>
+      <ul>
+        ${priorities.slice(0, 7).map((priority) => `<li>${priority}</li>`).join("")}
+      </ul>
+      <h4>Watch-outs</h4>
+      <ul>
+        ${(blockers.length ? blockers : ["No major blockers from today&apos;s inputs. Keep the tracker updated after every touch."]).map((item) => `<li>${item}</li>`).join("")}
+      </ul>
+      <h4>Stop doing today</h4>
+      <ul>
+        ${stopList.map((item) => `<li>${item}</li>`).join("")}
+      </ul>
+      <h4>Tracker note</h4>
+      <pre class="csv-output">${escapeHtml(`Daily plan ${formatDate(new Date())}: mode=${modeLabel}; prospects=${prospects}; qualified=${qualified}; audits=${audits}; emails=${emails}; follow_ups=${followUps}; onboarding=${onboarding}; fulfillment=${fulfillment}; next_tool=${nextTool}`)}</pre>
     </div>
   `;
 });
