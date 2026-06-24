@@ -66,6 +66,8 @@ const monthlyReportForm = document.querySelector("#monthlyReportForm");
 const monthlyReportOutput = document.querySelector("#monthlyReportOutput");
 const intakeForm = document.querySelector("#intakeForm");
 const intakeOutput = document.querySelector("#intakeOutput");
+const clientStatusForm = document.querySelector("#clientStatusForm");
+const clientStatusOutput = document.querySelector("#clientStatusOutput");
 const signalCanvas = document.querySelector("#signalCanvas");
 
 function escapeHtml(value) {
@@ -1112,6 +1114,99 @@ if (intakeForm && intakeOutput) intakeForm.addEventListener("submit", (event) =>
       <pre class="csv-output">${escapeHtml(clientLocationRow)}</pre>
       <h4>invoice-tracker.csv row</h4>
       <pre class="csv-output">${escapeHtml(invoiceRow)}</pre>
+    </div>
+  `;
+});
+
+if (clientStatusForm && clientStatusOutput) clientStatusForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(clientStatusForm);
+  const agency = escapeHtml(data.get("agency"));
+  const client = escapeHtml(data.get("client"));
+  const packageName = escapeHtml(data.get("package"));
+  const invoiceStatus = escapeHtml(data.get("invoiceStatus"));
+  const gbpAccess = escapeHtml(data.get("gbpAccess"));
+  const owner = escapeHtml(data.get("owner"));
+  const serviceStatus = escapeHtml(data.get("serviceStatus"));
+  const dueDate = escapeHtml(data.get("dueDate") || "");
+  const note = escapeHtml(data.get("note") || "");
+  const today = formatDate(new Date());
+  const blockers = [];
+
+  if (invoiceStatus !== "Paid") blockers.push(`Invoice is ${invoiceStatus.toLowerCase()}. Do not start fulfillment until payment is confirmed.`);
+  if (gbpAccess.includes("pending") || gbpAccess.includes("Waiting")) blockers.push(`Google profile access is not ready: ${gbpAccess}.`);
+  if (serviceStatus === "Blocked") blockers.push("Service is marked blocked. Resolve the note before drafting deliverables.");
+  if (serviceStatus === "Paused") blockers.push("Service is paused. Confirm restart before doing fulfillment work.");
+
+  const isReady = invoiceStatus === "Paid" && !gbpAccess.includes("pending") && !gbpAccess.includes("Waiting") && serviceStatus !== "Blocked" && serviceStatus !== "Paused";
+  const due = dueDate ? new Date(`${dueDate}T00:00:00`) : null;
+  const dueTodayOrPast = due ? due <= new Date(`${today}T23:59:59`) : false;
+  const health = blockers.length
+    ? "Blocked"
+    : dueTodayOrPast
+      ? "Due now"
+      : isReady && serviceStatus === "Ready for first batch"
+        ? "Ready"
+        : isReady
+          ? "Active"
+          : "Onboarding";
+  const nextAction = blockers.length
+    ? blockers[0]
+    : dueTodayOrPast
+      ? "Build the weekly fulfillment batch and send the approval update to the agency."
+      : serviceStatus === "Ready for first batch"
+        ? "Prepare the first review reply batch and one Google post draft for approval."
+        : "No urgent client action. Check again on the next fulfillment due date.";
+  const clientStatusUpdate = blockers.length ? "Blocked" : serviceStatus === "Ready for first batch" ? "Ready for first batch" : serviceStatus;
+  const invoiceTrackerNote = `Checked ${today}. ${health}. ${nextAction} ${note}`.trim();
+  const clientLocationUpdate = [
+    ["agency_name", agency],
+    ["client_business", client],
+    ["gbp_access", gbpAccess],
+    ["approval_owner", owner],
+    ["status", clientStatusUpdate],
+    ["notes", invoiceTrackerNote]
+  ];
+  const invoiceUpdate = [
+    ["agency_name", agency],
+    ["client_business", client],
+    ["package", packageName],
+    ["status", invoiceStatus],
+    ["notes", invoiceTrackerNote]
+  ];
+
+  clientStatusOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">Client status brief</span>
+      <button class="tool-button" type="button" data-copy-target="clientStatusOutput">Copy Status</button>
+    </div>
+    <div class="copy-document">
+      <div class="score-meter compact-meter">
+        <strong>${health}</strong>
+        <span>${packageName}</span>
+      </div>
+      <h4>${client} status brief</h4>
+      <p><strong>Agency:</strong> ${agency}. <strong>Approval owner:</strong> ${owner}.</p>
+      <p><strong>Invoice:</strong> ${invoiceStatus}. <strong>Access:</strong> ${gbpAccess}. <strong>Service:</strong> ${serviceStatus}.</p>
+      <p><strong>Next fulfillment due:</strong> ${dueDate || "not set"}.</p>
+      <h4>Next action</h4>
+      <p>${nextAction}</p>
+      <h4>Blockers</h4>
+      <ul>
+        ${blockers.length ? blockers.map((blocker) => `<li>${blocker}</li>`).join("") : "<li>No blockers. Client is safe to work on within the approved scope.</li>"}
+      </ul>
+      <h4>Agency update</h4>
+      <p>Hi ${agency}, quick status update for ${client}: current state is ${health.toLowerCase()}. ${nextAction}</p>
+      <h4>client-locations.csv updates</h4>
+      <ul>
+        ${clientLocationUpdate.map(([field, value]) => `<li><strong>${field}:</strong> ${value}</li>`).join("")}
+      </ul>
+      <h4>invoice-tracker.csv updates</h4>
+      <ul>
+        ${invoiceUpdate.map(([field, value]) => `<li><strong>${field}:</strong> ${value}</li>`).join("")}
+      </ul>
+      <h4>Tracker note</h4>
+      <pre class="csv-output">${escapeHtml(invoiceTrackerNote)}</pre>
     </div>
   `;
 });

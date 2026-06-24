@@ -671,6 +671,12 @@ h1 {
   margin-bottom: clamp(18px, 4vw, 34px);
 }
 
+.status-builder {
+  display: grid;
+  grid-template-columns: minmax(280px, 440px) minmax(0, 1fr);
+  gap: clamp(18px, 4vw, 34px);
+}
+
 .onboard-builder {
   display: grid;
 }
@@ -875,6 +881,7 @@ h1 {
   .score-builder,
   .onboard-builder,
   .batch-builder,
+  .status-builder,
   .fulfill-grid,
   .pricing-grid,
   .report-preview {
