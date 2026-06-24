@@ -528,6 +528,10 @@ h1 {
   background: #eef5f0;
 }
 
+.fit-section {
+  background: #f7faf8;
+}
+
 .fulfill-section {
   background: #f7faf8;
 }
@@ -538,7 +542,8 @@ h1 {
 
 .audit-builder,
 .score-builder,
-.onboard-builder {
+.onboard-builder,
+.fit-builder {
   grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
   align-items: stretch;
   gap: clamp(18px, 4vw, 34px);
@@ -547,7 +552,8 @@ h1 {
 .audit-form,
 .audit-output,
 .score-form,
-.score-output {
+.score-output,
+.fit-output {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -600,6 +606,16 @@ h1 {
 
 .score-output {
   padding: clamp(22px, 4vw, 36px);
+}
+
+.fit-output {
+  padding: clamp(22px, 4vw, 36px);
+}
+
+.inline-mail-button {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 4px;
 }
 
 .audit-output h3,
@@ -898,6 +914,7 @@ h1 {
   .audit-builder,
   .score-builder,
   .onboard-builder,
+  .fit-builder,
   .batch-builder,
   .status-builder,
   .sop-builder,

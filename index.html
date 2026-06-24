@@ -20,6 +20,7 @@
       <nav class="nav-links" aria-label="Page sections">
         <a href="#service">Service</a>
         <a href="#workflow">Workflow</a>
+        <a href="#fit-check">Fit Check</a>
         <a href="#guardrails">Guardrails</a>
         <a href="#pricing">Pricing</a>
       </nav>
@@ -166,6 +167,72 @@
           <article class="price-card">
             <h3>3. Continue Or Expand</h3>
             <p>Move into the Review Desk only if the pilot saves time and creates client-ready work.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="fit-check" class="section fit-section">
+        <div class="section-heading">
+          <p class="eyebrow">Pilot fit check</p>
+          <h2>See if your agency is ready for a white-label review desk.</h2>
+          <p>
+            Answer a few questions, then send a structured pilot request. This keeps the first conversation practical and focused on one testable client location.
+          </p>
+        </div>
+
+        <div class="fit-builder">
+          <form class="mini-form" id="pilotFitForm">
+            <h3>Check Pilot Fit</h3>
+            <label>
+              Agency name
+              <input name="agency" type="text" value="BrightRoute Media" required>
+            </label>
+            <label>
+              Contact email
+              <input name="email" type="email" value="hello@example-agency.com" required>
+            </label>
+            <label>
+              Local clients managed
+              <input name="clients" type="number" min="0" value="6" required>
+            </label>
+            <label>
+              First niche to test
+              <select name="niche">
+                <option>home services</option>
+                <option>cleaning companies</option>
+                <option>mobile detailers</option>
+                <option>lawn care</option>
+                <option>mixed local businesses</option>
+              </select>
+            </label>
+            <label>
+              Current review workflow
+              <select name="workflow">
+                <option>owner or team replies manually</option>
+                <option>agency drafts replies manually</option>
+                <option>reviews are mostly unanswered</option>
+                <option>already using software but still doing the work</option>
+              </select>
+            </label>
+            <label>
+              Preferred start
+              <select name="start">
+                <option>one client location this week</option>
+                <option>one client location this month</option>
+                <option>exploring for later</option>
+              </select>
+            </label>
+            <button class="primary-button form-button" type="submit">Check Fit</button>
+          </form>
+
+          <article class="tool-output fit-output" id="pilotFitOutput" aria-live="polite">
+            <div class="output-actions">
+              <span class="report-label">Pilot fit result</span>
+            </div>
+            <div class="copy-document">
+              <h4>Start with one client location.</h4>
+              <p>Use the fit check to generate a practical request with the details Aquila Local needs to reply with the next step.</p>
+            </div>
           </article>
         </div>
       </section>

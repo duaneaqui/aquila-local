@@ -74,6 +74,8 @@ const dataImportForm = document.querySelector("#dataImportForm");
 const dataImportOutput = document.querySelector("#dataImportOutput");
 const releaseReadinessForm = document.querySelector("#releaseReadinessForm");
 const releaseReadinessOutput = document.querySelector("#releaseReadinessOutput");
+const pilotFitForm = document.querySelector("#pilotFitForm");
+const pilotFitOutput = document.querySelector("#pilotFitOutput");
 const signalCanvas = document.querySelector("#signalCanvas");
 
 function escapeHtml(value) {
@@ -1499,6 +1501,85 @@ if (releaseReadinessForm && releaseReadinessOutput) releaseReadinessForm.addEven
       <p>${releaseNote}</p>
       <h4>Tracker note</h4>
       <pre class="csv-output">${escapeHtml(`Release gate ${formatDate(new Date())}: label=${releaseLabel}; verdict=${verdict}; next=${nextAction}`)}</pre>
+    </div>
+  `;
+});
+
+if (pilotFitForm && pilotFitOutput) pilotFitForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(pilotFitForm);
+  const agency = escapeHtml(data.get("agency"));
+  const email = escapeHtml(data.get("email"));
+  const clients = Number(data.get("clients"));
+  const niche = escapeHtml(data.get("niche"));
+  const workflow = escapeHtml(data.get("workflow"));
+  const start = escapeHtml(data.get("start"));
+  let score = 25;
+  const reasons = [];
+
+  if (clients >= 3) {
+    score += 25;
+    reasons.push("You manage enough local clients for a repeatable review operations workflow.");
+  } else {
+    reasons.push("You may still fit, but the pilot should start with one clear client location.");
+  }
+
+  if (/home|cleaning|detail|lawn/i.test(niche)) {
+    score += 20;
+    reasons.push("Your test niche is a practical early fit because reviews influence local buyer trust.");
+  } else {
+    score += 10;
+    reasons.push("Mixed local clients can fit if the first location has visible review activity.");
+  }
+
+  if (/unanswered|manual|software/i.test(workflow)) {
+    score += 25;
+    reasons.push("There is a clear fulfillment gap Aquila Local can remove from your team.");
+  }
+
+  if (/week|month/i.test(start)) {
+    score += 15;
+    reasons.push("Your timeline is specific enough for a bounded founding pilot.");
+  }
+
+  score = Math.min(100, score);
+  const fit = score >= 80 ? "Strong pilot fit" : score >= 60 ? "Good fit for a narrow test" : "Needs a tighter first client";
+  const subject = encodeURIComponent(`Aquila Local pilot fit - ${agency}`);
+  const body = encodeURIComponent([
+    "Hi Aquila Local,",
+    "",
+    "I completed the pilot fit check and want to explore the founding pilot.",
+    "",
+    `Agency: ${agency}`,
+    `Contact email: ${email}`,
+    `Local clients managed: ${clients}`,
+    `First niche to test: ${niche}`,
+    `Current review workflow: ${workflow}`,
+    `Preferred start: ${start}`,
+    `Fit result: ${fit} (${score}/100)`,
+    "",
+    "Please send the next step for testing one client location.",
+    "",
+    "Thanks"
+  ].join("\n"));
+  const mailto = `mailto:aquila.local@gmail.com?subject=${subject}&body=${body}`;
+
+  pilotFitOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">Pilot fit result</span>
+    </div>
+    <div class="copy-document">
+      <div class="score-meter compact-meter">
+        <strong>${score}</strong>
+        <span>${fit}</span>
+      </div>
+      <h4>${agency} is a ${fit.toLowerCase()}.</h4>
+      <p><strong>Recommended start:</strong> one client location, Google-first, bounded to the founding pilot.</p>
+      <h4>Why</h4>
+      <ul>
+        ${reasons.map((reason) => `<li>${reason}</li>`).join("")}
+      </ul>
+      <p><a class="primary-button inline-mail-button" href="${mailto}">Send Pilot Request</a></p>
     </div>
   `;
 });
