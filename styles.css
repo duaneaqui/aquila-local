@@ -532,6 +532,43 @@ h1 {
   background: #f7faf8;
 }
 
+.sample-section {
+  background: #fbfcfa;
+}
+
+.sample-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 3vw, 28px);
+}
+
+.sample-card {
+  display: grid;
+  align-content: start;
+  min-height: 300px;
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 12px 30px rgba(20, 34, 29, 0.06);
+}
+
+.sample-card h3 {
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+}
+
+.sample-card p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.sample-card small {
+  align-self: end;
+  margin-top: 18px;
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
 .fulfill-section {
   background: #f7faf8;
 }
@@ -922,6 +959,7 @@ h1 {
   .release-builder,
   .fulfill-grid,
   .pricing-grid,
+  .sample-grid,
   .report-preview {
     grid-template-columns: 1fr;
   }
