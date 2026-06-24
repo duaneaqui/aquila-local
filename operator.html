@@ -480,6 +480,74 @@
         </div>
       </section>
 
+      <section id="follow-up" class="section score-section">
+        <div class="section-heading">
+          <p class="eyebrow">Follow-up desk</p>
+          <h2>Turn one tracker row into the next outreach move.</h2>
+          <p>
+            Use this after a sample audit is sent. It decides the next follow-up date, the correct status update, and the message to send.
+          </p>
+        </div>
+
+        <div class="audit-builder">
+          <form class="audit-form" id="followUpForm">
+            <label>
+              Agency name
+              <input name="agency" type="text" value="BrightRoute Media" required>
+            </label>
+            <label>
+              Contact first name
+              <input name="contact" type="text" value="Jordan" required>
+            </label>
+            <label>
+              Niche or sample angle
+              <input name="niche" type="text" value="pressure washing" required>
+            </label>
+            <label>
+              Current outreach stage
+              <select name="stage">
+                <option value="notContacted">Not contacted</option>
+                <option value="firstSent">First audit email sent</option>
+                <option value="followOneSent">Follow-up 1 sent</option>
+                <option value="followTwoSent">Follow-up 2 sent</option>
+                <option value="interested">Replied interested</option>
+                <option value="notInterested">Replied not interested</option>
+              </select>
+            </label>
+            <label>
+              Last touch date
+              <input name="lastTouch" type="date">
+            </label>
+            <label>
+              Reply signal
+              <select name="replySignal">
+                <option>No reply yet</option>
+                <option>Asked for details</option>
+                <option>Asked for pricing</option>
+                <option>Wants a call</option>
+                <option>Not a fit</option>
+              </select>
+            </label>
+            <label>
+              Note from tracker
+              <textarea name="note" rows="4" placeholder="Paste any useful note from the prospect row.">Sample audit drafted. Strong fit for white-label reputation operations.</textarea>
+            </label>
+            <button class="primary-button form-button" type="submit">Plan Follow-up</button>
+          </form>
+
+          <article class="audit-output" id="followUpOutput" aria-live="polite">
+            <div class="output-actions">
+              <span class="report-label">Next outreach move</span>
+              <button class="tool-button" type="button" data-copy-target="followUpOutput">Copy Follow-up</button>
+            </div>
+            <div class="copy-document">
+              <h3>Ready to plan the next touch.</h3>
+              <p>Fill the form to generate the next due date, tracker update values, and the exact message to send.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="fulfill" class="section fulfill-section">
         <div class="section-heading">
           <p class="eyebrow">Internal fulfillment desk</p>

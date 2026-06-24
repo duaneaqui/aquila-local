@@ -54,6 +54,8 @@ const scoreForm = document.querySelector("#scoreForm");
 const scoreOutput = document.querySelector("#scoreOutput");
 const auditForm = document.querySelector("#auditForm");
 const auditOutput = document.querySelector("#auditOutput");
+const followUpForm = document.querySelector("#followUpForm");
+const followUpOutput = document.querySelector("#followUpOutput");
 const replyForm = document.querySelector("#replyForm");
 const replyOutput = document.querySelector("#replyOutput");
 const monthlyReportForm = document.querySelector("#monthlyReportForm");
@@ -77,6 +79,16 @@ function csvField(value) {
     return `"${stringValue.replaceAll('"', '""')}"`;
   }
   return stringValue;
+}
+
+function formatDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function addDays(date, days) {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+  return nextDate;
 }
 
 function sentimentClass(sentiment) {
@@ -590,6 +602,146 @@ if (auditForm && auditOutput) auditForm.addEventListener("submit", (event) => {
       <p>Hi ${contact}, I noticed ${agency} serves local businesses. I put together a quick white-label trust audit for a ${niche}: ${rating.toFixed(1)} rating, ${reviewsCount} reviews, ${freshness} days since the latest review, and ${coverage} replies. Want me to send the sample?</p>
       <h4>Tracker notes</h4>
       <pre class="csv-output">${escapeHtml(trackerNotes)}</pre>
+    </div>
+  `;
+});
+
+if (followUpForm && followUpOutput) followUpForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(followUpForm);
+  const agency = escapeHtml(data.get("agency"));
+  const contact = escapeHtml(data.get("contact"));
+  const niche = escapeHtml(data.get("niche"));
+  const stage = data.get("stage");
+  const replySignal = escapeHtml(data.get("replySignal"));
+  const note = escapeHtml(data.get("note") || "");
+  const today = new Date();
+  const lastTouchRaw = data.get("lastTouch");
+  const lastTouch = lastTouchRaw ? new Date(`${lastTouchRaw}T00:00:00`) : today;
+  const firstEmailDate = stage === "notContacted" ? formatDate(today) : "";
+  const followUpOneDate = stage === "firstSent" ? formatDate(today) : "";
+  const followUpTwoDate = stage === "followOneSent" ? formatDate(today) : "";
+
+  const stagePlans = {
+    notContacted: {
+      label: "Send first audit email",
+      status: "First email sent",
+      replyStatus: "Not sent",
+      closeStatus: "Open",
+      nextFollowUp: formatDate(addDays(today, 3)),
+      cadence: "Follow up in 3 days if there is no reply.",
+      subject: `quick white-label sample for ${agency}`,
+      message: [
+        `Hi ${contact},`,
+        `I noticed ${agency} works with local businesses, so I put together a quick white-label reputation sample for a ${niche} client.`,
+        "The angle is simple: review reply drafts, weekly Google profile post drafts, escalation flags, and a monthly activity report your agency can forward under its own brand.",
+        "Want me to send the sample?"
+      ]
+    },
+    firstSent: {
+      label: "Send follow-up 1",
+      status: "Follow-up 1 sent",
+      replyStatus: "No reply",
+      closeStatus: "Open",
+      nextFollowUp: formatDate(addDays(today, 4)),
+      cadence: "Follow up again in 4 days if there is no reply.",
+      subject: `re: quick white-label sample for ${agency}`,
+      message: [
+        `Hi ${contact}, quick follow-up.`,
+        `The sample I made for the ${niche} angle is meant to show how ${agency} could add a reputation desk without hiring another operator.`,
+        "It is built around bounded deliverables: review reply drafts, Google post drafts, approval flags, and a monthly report.",
+        "Should I send it over?"
+      ]
+    },
+    followOneSent: {
+      label: "Send follow-up 2",
+      status: "Follow-up 2 sent",
+      replyStatus: "No reply",
+      closeStatus: "Open",
+      nextFollowUp: formatDate(addDays(today, 7)),
+      cadence: "Final soft close in 7 days if there is still no reply.",
+      subject: `worth sending the sample?`,
+      message: [
+        `Hi ${contact}, one more note from me.`,
+        `For agencies serving ${niche} or similar local businesses, the main gap is usually not strategy. It is keeping review replies, Google profile posts, and reporting consistently handled.`,
+        "That is the piece I can run quietly under your brand.",
+        "Worth sending the sample, or should I close the loop?"
+      ]
+    },
+    followTwoSent: {
+      label: "Send final close-the-loop note",
+      status: "Final follow-up sent",
+      replyStatus: "No reply",
+      closeStatus: "Close if no reply",
+      nextFollowUp: formatDate(addDays(today, 14)),
+      cadence: "Archive or recycle in 14 days unless they respond.",
+      subject: `closing the loop`,
+      message: [
+        `Hi ${contact}, I will close the loop here.`,
+        `If ${agency} ever wants white-label help with review replies, Google profile post drafts, escalation notes, and simple monthly reputation reports, I can send a sample.`,
+        "No need to reply if this is not relevant."
+      ]
+    },
+    interested: {
+      label: "Send qualification reply",
+      status: "Reply received",
+      replyStatus: replySignal,
+      closeStatus: "Active conversation",
+      nextFollowUp: formatDate(addDays(today, 1)),
+      cadence: "Reply within 24 hours and move toward a pilot invoice or short call.",
+      subject: `re: white-label reputation sample`,
+      message: [
+        `Hi ${contact}, thanks for getting back to me.`,
+        `The easiest next step is for me to build one sample around a real ${niche} or similar client profile, then you can judge if the workflow fits ${agency}.`,
+        "If helpful, send one client niche, their Google profile link, and the brand tone you want replies to follow."
+      ]
+    },
+    notInterested: {
+      label: "Mark closed",
+      status: "Closed",
+      replyStatus: "Not interested",
+      closeStatus: "Closed - not interested",
+      nextFollowUp: "",
+      cadence: "Do not follow up unless they ask you to.",
+      subject: `re: white-label reputation sample`,
+      message: [
+        `Thanks ${contact}, understood.`,
+        "I will not follow up further. Wishing you and the team well."
+      ]
+    }
+  };
+
+  const plan = stagePlans[stage] || stagePlans.notContacted;
+  const trackerUpdates = [
+    ["status", plan.status],
+    ["first_email_date", firstEmailDate || "keep existing"],
+    ["follow_up_1_date", followUpOneDate || "keep existing"],
+    ["follow_up_2_date", followUpTwoDate || "keep existing"],
+    ["last_touch_date", formatDate(today)],
+    ["next_follow_up", plan.nextFollowUp || "blank"],
+    ["reply_status", plan.replyStatus],
+    ["close_status", plan.closeStatus],
+    ["notes", `${plan.label}. ${plan.cadence} ${note}`.trim()]
+  ];
+
+  followUpOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">Next outreach move</span>
+      <button class="tool-button" type="button" data-copy-target="followUpOutput">Copy Follow-up</button>
+    </div>
+    <div class="copy-document">
+      <h3>${plan.label} for ${agency}</h3>
+      <p><strong>Last touch:</strong> ${formatDate(lastTouch)}. <strong>Next follow-up:</strong> ${plan.nextFollowUp || "none"}.</p>
+      <p><strong>Cadence:</strong> ${plan.cadence}</p>
+      <h4>Message to send</h4>
+      <p><strong>Subject:</strong> ${plan.subject}</p>
+      ${plan.message.map((line) => `<p>${line}</p>`).join("")}
+      <h4>Tracker update values</h4>
+      <ul>
+        ${trackerUpdates.map(([field, value]) => `<li><strong>${field}:</strong> ${escapeHtml(value)}</li>`).join("")}
+      </ul>
+      <h4>CSV note</h4>
+      <pre class="csv-output">${escapeHtml(trackerUpdates.map(([field, value]) => `${field}=${value}`).join(" | "))}</pre>
     </div>
   `;
 });
