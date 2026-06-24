@@ -72,6 +72,8 @@ const launchChecklistForm = document.querySelector("#launchChecklistForm");
 const launchChecklistOutput = document.querySelector("#launchChecklistOutput");
 const dataImportForm = document.querySelector("#dataImportForm");
 const dataImportOutput = document.querySelector("#dataImportOutput");
+const releaseReadinessForm = document.querySelector("#releaseReadinessForm");
+const releaseReadinessOutput = document.querySelector("#releaseReadinessOutput");
 const signalCanvas = document.querySelector("#signalCanvas");
 
 function escapeHtml(value) {
@@ -1427,6 +1429,76 @@ if (dataImportForm && dataImportOutput) dataImportForm.addEventListener("submit"
       </ul>
       <h4>Tracker note</h4>
       <pre class="csv-output">${escapeHtml(summaryNote)}</pre>
+    </div>
+  `;
+});
+
+if (releaseReadinessForm && releaseReadinessOutput) releaseReadinessForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(releaseReadinessForm);
+  const releaseLabel = escapeHtml(data.get("releaseLabel"));
+  const releaseNote = escapeHtml(data.get("releaseNote") || "");
+  const checks = [
+    ["localQa", "Local browser QA passed"],
+    ["syntaxCheck", "JS syntax check passed"],
+    ["privacyScan", "Private address/payment scan passed"],
+    ["publicClean", "Public homepage exposes no internal tools"],
+    ["queuedCommits", "Local commits are checkpointed"],
+    ["operatorFlow", "Sales, onboarding, fulfillment, status, SOP, and import flows exist"],
+    ["noSecrets", "No API keys, passwords, or exact payment account in deploy files"],
+    ["ownerApproval", "Owner approves pushing to GitHub"],
+    ["deployApproval", "Owner approves Vercel production deploy"]
+  ];
+  const requiredForReview = ["localQa", "syntaxCheck", "privacyScan", "publicClean", "queuedCommits", "operatorFlow", "noSecrets"];
+  const requiredForDeploy = [...requiredForReview, "ownerApproval", "deployApproval"];
+  const missingReview = requiredForReview
+    .filter((field) => !data.get(field))
+    .map((field) => checks.find(([key]) => key === field)?.[1] || field);
+  const missingDeploy = requiredForDeploy
+    .filter((field) => !data.get(field))
+    .map((field) => checks.find(([key]) => key === field)?.[1] || field);
+  const verdict = missingReview.length
+    ? "Not ready"
+    : missingDeploy.length
+      ? "Ready for owner review"
+      : "Approved to release";
+  const nextAction = missingReview.length
+    ? `Fix before review: ${missingReview[0]}.`
+    : missingDeploy.length
+      ? "Show the local build to the owner, then request explicit GitHub push and Vercel deploy approval."
+      : "Push queued commits to GitHub, deploy to Vercel production, and verify the live operator page.";
+
+  releaseReadinessOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">Deployment gate verdict</span>
+      <button class="tool-button" type="button" data-copy-target="releaseReadinessOutput">Copy Verdict</button>
+    </div>
+    <div class="copy-document">
+      <div class="score-meter compact-meter">
+        <strong>${verdict}</strong>
+        <span>${releaseLabel}</span>
+      </div>
+      <h4>Release readiness verdict</h4>
+      <p><strong>Next action:</strong> ${nextAction}</p>
+      <h4>Missing before review</h4>
+      <ul>
+        ${missingReview.length ? missingReview.map((item) => `<li>${item}</li>`).join("") : "<li>No review blockers.</li>"}
+      </ul>
+      <h4>Missing before push/deploy</h4>
+      <ul>
+        ${missingDeploy.length ? missingDeploy.map((item) => `<li>${item}</li>`).join("") : "<li>No deployment blockers.</li>"}
+      </ul>
+      <h4>Release rules</h4>
+      <ul>
+        <li>Do not deploy internal tools until local browser QA passes.</li>
+        <li>Do not push private address, payment account, passwords, API keys, or unpublished private docs.</li>
+        <li>After deploy, verify the live operator page returns 200 and contains the newest release marker.</li>
+        <li>Keep the public landing page free of internal operator forms.</li>
+      </ul>
+      <h4>Release note</h4>
+      <p>${releaseNote}</p>
+      <h4>Tracker note</h4>
+      <pre class="csv-output">${escapeHtml(`Release gate ${formatDate(new Date())}: label=${releaseLabel}; verdict=${verdict}; next=${nextAction}`)}</pre>
     </div>
   `;
 });

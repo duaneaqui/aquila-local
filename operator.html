@@ -1059,6 +1059,53 @@ BrightRoute Media,https://example-agency.com,Jordan,Owner,jordan@example-agency.
         </div>
       </section>
 
+      <section id="release-readiness" class="section onboard-section">
+        <div class="section-heading">
+          <p class="eyebrow">Release readiness</p>
+          <h2>Approve the deployment batch only when the suite is actually ready.</h2>
+          <p>
+            Use this before pushing queued local commits or deploying to Vercel. It keeps private data out and prevents half-built operator tools from going live.
+          </p>
+        </div>
+
+        <div class="release-builder">
+          <form class="mini-form" id="releaseReadinessForm">
+            <h3>Deployment Gate</h3>
+            <label>
+              Release label
+              <input name="releaseLabel" type="text" value="Operator suite completion batch" required>
+            </label>
+            <div class="checkbox-grid" aria-label="Release readiness checks">
+              <label><input name="localQa" type="checkbox" checked> Local browser QA passed</label>
+              <label><input name="syntaxCheck" type="checkbox" checked> JS syntax check passed</label>
+              <label><input name="privacyScan" type="checkbox" checked> Private address/payment scan passed</label>
+              <label><input name="publicClean" type="checkbox" checked> Public homepage exposes no internal tools</label>
+              <label><input name="queuedCommits" type="checkbox" checked> Local commits are checkpointed</label>
+              <label><input name="operatorFlow" type="checkbox" checked> Sales, onboarding, fulfillment, status, SOP, and import flows exist</label>
+              <label><input name="noSecrets" type="checkbox" checked> No API keys, passwords, or exact payment account in deploy files</label>
+              <label><input name="ownerApproval" type="checkbox"> Owner approves pushing to GitHub</label>
+              <label><input name="deployApproval" type="checkbox"> Owner approves Vercel production deploy</label>
+            </div>
+            <label>
+              Release note
+              <textarea name="releaseNote" rows="4">Queued internal operator tools are ready for review. Deploy only after owner approval.</textarea>
+            </label>
+            <button class="primary-button form-button" type="submit">Build Release Verdict</button>
+          </form>
+
+          <article class="tool-output" id="releaseReadinessOutput" aria-live="polite">
+            <div class="output-actions">
+              <span class="report-label">Deployment gate verdict</span>
+              <button class="tool-button" type="button" data-copy-target="releaseReadinessOutput">Copy Verdict</button>
+            </div>
+            <div class="copy-document">
+              <h4>Release Readiness Verdict</h4>
+              <p>Complete the checks before pushing local commits or deploying the operator suite.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="pricing" class="section pricing-section">
         <div class="section-heading">
           <p class="eyebrow">Simple pricing</p>

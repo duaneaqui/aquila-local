@@ -689,6 +689,12 @@ h1 {
   gap: clamp(18px, 4vw, 34px);
 }
 
+.release-builder {
+  display: grid;
+  grid-template-columns: minmax(280px, 460px) minmax(0, 1fr);
+  gap: clamp(18px, 4vw, 34px);
+}
+
 .onboard-builder {
   display: grid;
 }
@@ -896,6 +902,7 @@ h1 {
   .status-builder,
   .sop-builder,
   .data-builder,
+  .release-builder,
   .fulfill-grid,
   .pricing-grid,
   .report-preview {
