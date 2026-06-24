@@ -48,6 +48,8 @@ const agentGrid = document.querySelector("#agentGrid");
 const refreshQueue = document.querySelector("#refreshQueue");
 const buildReport = document.querySelector("#buildReport");
 const reportPreview = document.querySelector("#reportPreview");
+const prospectEntryForm = document.querySelector("#prospectEntryForm");
+const prospectEntryOutput = document.querySelector("#prospectEntryOutput");
 const scoreForm = document.querySelector("#scoreForm");
 const scoreOutput = document.querySelector("#scoreOutput");
 const auditForm = document.querySelector("#auditForm");
@@ -67,6 +69,14 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function csvField(value) {
+  const stringValue = String(value ?? "");
+  if (/[",\n\r]/.test(stringValue)) {
+    return `"${stringValue.replaceAll('"', '""')}"`;
+  }
+  return stringValue;
 }
 
 function sentimentClass(sentiment) {
@@ -248,6 +258,139 @@ if (buildReport && reportPreview) buildReport.addEventListener("click", () => {
     <div>
       <span class="report-label">Risk flags</span>
       <strong>7</strong>
+    </div>
+  `;
+});
+
+if (prospectEntryForm && prospectEntryOutput) prospectEntryForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(prospectEntryForm);
+  const agencyName = escapeHtml(data.get("agencyName"));
+  const website = escapeHtml(data.get("website"));
+  const contactName = escapeHtml(data.get("contactName") || "");
+  const role = escapeHtml(data.get("role") || "");
+  const email = escapeHtml(data.get("email") || "");
+  const linkedin = escapeHtml(data.get("linkedin") || "");
+  const agencyType = escapeHtml(data.get("agencyType"));
+  const nicheFocus = escapeHtml(data.get("nicheFocus"));
+  const targetClientType = escapeHtml(data.get("targetClientType") || "local service businesses");
+  const emailSource = escapeHtml(data.get("emailSource") || "Manual research");
+  const reasons = [];
+  const risks = [];
+  let score = 20;
+
+  if (nicheFocus === "Home services") {
+    score += 20;
+    reasons.push("Serves home-service clients.");
+  } else if (nicheFocus === "Mixed local") {
+    score += 12;
+    reasons.push("Serves mixed local businesses.");
+  } else if (nicheFocus === "Restaurants") {
+    score += 2;
+    risks.push("Restaurants may create high review volume and emotional complaint handling.");
+  } else if (nicheFocus === "Regulated") {
+    score -= 20;
+    risks.push("Regulated niches add approval and compliance friction.");
+  }
+
+  if (agencyType === "Local SEO" || agencyType === "GBP specialist") {
+    score += 18;
+    reasons.push("Core offer already connects to local visibility and Google profiles.");
+  } else if (agencyType === "Web design") {
+    score += 12;
+    reasons.push("Can bundle reputation operations into website care plans.");
+  } else if (agencyType === "Social media") {
+    score += 8;
+    reasons.push("Already sells recurring content-style services.");
+  } else {
+    score += 4;
+    risks.push("General agencies may need clearer positioning.");
+  }
+
+  const scoringSignals = [
+    ["sellsLocalSeo", 18, "Sells local SEO or GBP services."],
+    ["smallTeam", 12, "Small or founder-led team."],
+    ["visibleContact", 10, "Visible contact path."],
+    ["localExamples", 8, "Has local client examples."],
+    ["reputationMention", 8, "Mentions reviews, reputation, or GBP posting."],
+    ["retainerSignal", 6, "Offers care plans or retainers."]
+  ];
+
+  scoringSignals.forEach(([name, points, reason]) => {
+    if (data.get(name)) {
+      score += points;
+      reasons.push(reason);
+    }
+  });
+
+  if (!email && !linkedin) {
+    score -= 10;
+    risks.push("No direct contact path entered.");
+  }
+
+  score = Math.max(0, Math.min(100, score));
+  const priority = score >= 80 ? "High" : score >= 60 ? "Medium" : "Low";
+  const status = priority === "High" ? "Sample audit ready" : priority === "Medium" ? "Not contacted" : "Skip for now";
+  const auditStatus = priority === "High" ? "Needed" : "Not started";
+  const auditNiche = targetClientType;
+  const nextAction = priority === "High"
+    ? "Create mini audit and send audit-first email."
+    : priority === "Medium"
+      ? "Add to tracker and contact after high-priority prospects."
+      : "Skip unless a clear review/profile pain point appears.";
+  const notes = [
+    nextAction,
+    reasons.slice(0, 3).join(" "),
+    risks.length ? `Risks: ${risks.join(" ")}` : ""
+  ].filter(Boolean).join(" ");
+
+  const csvValues = [
+    agencyName,
+    website,
+    contactName,
+    role,
+    email,
+    linkedin,
+    agencyType,
+    nicheFocus,
+    targetClientType,
+    emailSource,
+    score,
+    priority,
+    status,
+    "",
+    "",
+    "",
+    "",
+    "",
+    auditStatus,
+    auditNiche,
+    "Not sent",
+    "Open",
+    notes
+  ];
+  const csvRow = csvValues.map(csvField).join(",");
+
+  prospectEntryOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">Tracker row preview</span>
+      <button class="tool-button" type="button" data-copy-target="prospectEntryOutput">Copy CSV Row</button>
+    </div>
+    <div class="copy-document">
+      <div class="score-meter">
+        <strong>${score}</strong>
+        <span>${priority} priority</span>
+      </div>
+      <h3>${agencyName} is a ${priority.toLowerCase()} priority prospect.</h3>
+      <p><strong>Next action:</strong> ${nextAction}</p>
+      <h4>Why</h4>
+      <ul>
+        ${reasons.slice(0, 5).map((reason) => `<li>${reason}</li>`).join("")}
+      </ul>
+      <h4>Risks</h4>
+      <p>${risks.length ? risks.join(" ") : "No major red flags from the entered signals."}</p>
+      <h4>CSV row</h4>
+      <pre class="csv-output">${escapeHtml(csvRow)}</pre>
     </div>
   `;
 });

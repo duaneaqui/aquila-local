@@ -705,6 +705,18 @@ h1 {
   line-height: 1.55;
 }
 
+.csv-output {
+  overflow-x: auto;
+  margin: 12px 0 0;
+  padding: 14px;
+  color: #dff5e9;
+  border-radius: 8px;
+  background: #101917;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  white-space: pre;
+}
+
 .score-meter {
   display: grid;
   width: min(220px, 100%);

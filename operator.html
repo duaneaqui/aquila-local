@@ -21,6 +21,7 @@
       <nav class="nav-links" aria-label="Page sections">
         <a href="index.html">Public Site</a>
         <a href="#dashboard">Dashboard</a>
+        <a href="#prospect-entry">Entry</a>
         <a href="#score">Score</a>
         <a href="#audit">Audit</a>
         <a href="#fulfill">Fulfill</a>
@@ -211,6 +212,92 @@
               </div>
             </section>
           </div>
+        </div>
+      </section>
+
+      <section id="prospect-entry" class="section score-section">
+        <div class="section-heading">
+          <p class="eyebrow">Prospect entry</p>
+          <h2>Turn one agency into a tracker-ready row.</h2>
+          <p>
+            Use this while researching agencies. Fill the fields, score the prospect, then copy the generated CSV row into `data/prospect-tracker.csv`.
+          </p>
+        </div>
+
+        <div class="audit-builder">
+          <form class="audit-form" id="prospectEntryForm">
+            <label>
+              Agency name
+              <input name="agencyName" type="text" value="BrightRoute Media" required>
+            </label>
+            <label>
+              Website
+              <input name="website" type="url" value="https://example-agency.com" required>
+            </label>
+            <label>
+              Contact name
+              <input name="contactName" type="text" value="Jordan">
+            </label>
+            <label>
+              Role
+              <input name="role" type="text" value="Owner">
+            </label>
+            <label>
+              Email
+              <input name="email" type="email" value="jordan@example-agency.com">
+            </label>
+            <label>
+              LinkedIn
+              <input name="linkedin" type="url" placeholder="https://www.linkedin.com/in/...">
+            </label>
+            <label>
+              Agency type
+              <select name="agencyType">
+                <option value="Local SEO">Local SEO</option>
+                <option value="Web design">Web design</option>
+                <option value="GBP specialist">GBP specialist</option>
+                <option value="Social media">Social media</option>
+                <option value="General marketing">General marketing</option>
+              </select>
+            </label>
+            <label>
+              Niche focus
+              <select name="nicheFocus">
+                <option value="Home services">Home services</option>
+                <option value="Mixed local">Mixed local</option>
+                <option value="Restaurants">Restaurants</option>
+                <option value="Regulated">Medical, legal, or finance</option>
+              </select>
+            </label>
+            <label>
+              Target client type
+              <input name="targetClientType" type="text" value="pressure washing">
+            </label>
+            <label>
+              Email source
+              <input name="emailSource" type="text" value="Website contact page">
+            </label>
+            <div class="checkbox-grid" aria-label="Prospect scoring signals">
+              <label><input name="sellsLocalSeo" type="checkbox" checked> Sells local SEO or GBP services</label>
+              <label><input name="smallTeam" type="checkbox" checked> Small or founder-led team</label>
+              <label><input name="visibleContact" type="checkbox" checked> Visible direct email or contact path</label>
+              <label><input name="localExamples" type="checkbox"> Has local client examples</label>
+              <label><input name="reputationMention" type="checkbox"> Mentions reviews, reputation, or GBP posting</label>
+              <label><input name="retainerSignal" type="checkbox"> Offers care plans or retainers</label>
+            </div>
+            <button class="primary-button form-button" type="submit">Build CSV Row</button>
+          </form>
+
+          <article class="audit-output" id="prospectEntryOutput" aria-live="polite">
+            <div class="output-actions">
+              <span class="report-label">Tracker row preview</span>
+              <button class="tool-button" type="button" data-copy-target="prospectEntryOutput">Copy CSV Row</button>
+            </div>
+            <div class="copy-document">
+              <h3>Ready for `data/prospect-tracker.csv`</h3>
+              <p>Fill the form to generate a scored row with status, audit niche, next action, and CSV output.</p>
+            </div>
+          </article>
         </div>
       </section>
 
