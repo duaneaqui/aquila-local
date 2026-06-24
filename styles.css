@@ -1262,6 +1262,20 @@ h1 {
   background: #f8faf7;
 }
 
+.final-cta {
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(7, 16, 13, 0.98), rgba(13, 79, 64, 0.94));
+}
+
+.final-cta .section-heading h2 {
+  color: #fff;
+}
+
+.final-cta .section-heading p:not(.eyebrow) {
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .workflow-card,
 .price-card,
 .review-item,

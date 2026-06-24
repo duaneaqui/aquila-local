@@ -229,13 +229,13 @@ tabs.forEach((tab) => {
   });
 });
 
-refreshQueue.addEventListener("click", () => {
+if (refreshQueue) refreshQueue.addEventListener("click", () => {
   const rotated = [...reviews.slice(1), reviews[0]];
   reviews.splice(0, reviews.length, ...rotated);
   renderReviews(reviews);
 });
 
-buildReport.addEventListener("click", () => {
+if (buildReport && reportPreview) buildReport.addEventListener("click", () => {
   reportPreview.innerHTML = `
     <div>
       <span class="report-label">Replies drafted</span>
@@ -252,7 +252,7 @@ buildReport.addEventListener("click", () => {
   `;
 });
 
-scoreForm.addEventListener("submit", (event) => {
+if (scoreForm && scoreOutput) scoreForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(scoreForm);
   const agency = escapeHtml(data.get("agencyName"));
@@ -357,7 +357,7 @@ scoreForm.addEventListener("submit", (event) => {
   `;
 });
 
-auditForm.addEventListener("submit", (event) => {
+if (auditForm && auditOutput) auditForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(auditForm);
   const agency = escapeHtml(data.get("agency"));
@@ -415,7 +415,7 @@ auditForm.addEventListener("submit", (event) => {
   `;
 });
 
-replyForm.addEventListener("submit", (event) => {
+if (replyForm && replyOutput) replyForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(replyForm);
   const business = escapeHtml(data.get("business"));
@@ -455,7 +455,7 @@ replyForm.addEventListener("submit", (event) => {
   `;
 });
 
-monthlyReportForm.addEventListener("submit", (event) => {
+if (monthlyReportForm && monthlyReportOutput) monthlyReportForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(monthlyReportForm);
   const agency = escapeHtml(data.get("agency"));
@@ -487,7 +487,7 @@ monthlyReportForm.addEventListener("submit", (event) => {
   `;
 });
 
-intakeForm.addEventListener("submit", (event) => {
+if (intakeForm && intakeOutput) intakeForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const data = new FormData(intakeForm);
   const agency = escapeHtml(data.get("agency"));
@@ -546,5 +546,5 @@ document.addEventListener("click", async (event) => {
 
 initSignalCanvas();
 initMotion();
-renderReviews(reviews);
-renderAgents();
+if (reviewList) renderReviews(reviews);
+if (agentGrid) renderAgents();
