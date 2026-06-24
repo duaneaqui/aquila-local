@@ -56,6 +56,8 @@ const auditForm = document.querySelector("#auditForm");
 const auditOutput = document.querySelector("#auditOutput");
 const followUpForm = document.querySelector("#followUpForm");
 const followUpOutput = document.querySelector("#followUpOutput");
+const fulfillmentBatchForm = document.querySelector("#fulfillmentBatchForm");
+const fulfillmentBatchOutput = document.querySelector("#fulfillmentBatchOutput");
 const replyForm = document.querySelector("#replyForm");
 const replyOutput = document.querySelector("#replyOutput");
 const monthlyReportForm = document.querySelector("#monthlyReportForm");
@@ -742,6 +744,102 @@ if (followUpForm && followUpOutput) followUpForm.addEventListener("submit", (eve
       </ul>
       <h4>CSV note</h4>
       <pre class="csv-output">${escapeHtml(trackerUpdates.map(([field, value]) => `${field}=${value}`).join(" | "))}</pre>
+    </div>
+  `;
+});
+
+if (fulfillmentBatchForm && fulfillmentBatchOutput) fulfillmentBatchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(fulfillmentBatchForm);
+  const agency = escapeHtml(data.get("agency"));
+  const client = escapeHtml(data.get("client"));
+  const businessType = escapeHtml(data.get("businessType"));
+  const tone = escapeHtml(data.get("tone"));
+  const operatorNote = escapeHtml(data.get("operatorNote") || "");
+  const reviewRows = String(data.get("reviewBatch") || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const postTopics = String(data.get("postTopics") || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  const parsedReviews = reviewRows.map((line, index) => {
+    const match = line.match(/^([1-5])\s*[\|\-:]\s*(.+)$/);
+    const stars = match ? Number(match[1]) : 5;
+    const text = match ? match[2] : line;
+    const reviewText = escapeHtml(text);
+    const lower = text.toLowerCase();
+    const riskyWords = ["refund", "legal", "lawyer", "damage", "unsafe", "injury", "discrimination", "fraud", "private", "called me back", "nobody called"];
+    const hasRiskTerm = riskyWords.some((word) => lower.includes(word));
+    const risk = stars < 3 || hasRiskTerm ? "Escalate" : stars === 3 ? "Approval" : "Normal";
+    const detail = lower.includes("time") || lower.includes("on time")
+      ? "arriving on time"
+      : lower.includes("communication") || lower.includes("called")
+        ? "the communication"
+        : lower.includes("clean") || lower.includes("driveway") || lower.includes("patio")
+          ? "the cleaning work"
+          : "sharing the details of the visit";
+    const reply = risk === "Escalate"
+      ? `Internal briefing only: Review ${index + 1} should be approved by ${agency} or the client owner before public use. Suggested holding response: Thank you for telling us about this. We are sorry the experience did not go as expected, and our owner will review the details directly.`
+      : stars === 3
+        ? `Thank you for the honest feedback. We are glad part of the service helped, and we are sorry it was not as smooth as it should have been. The owner will review this with the team.`
+        : `${tone.includes("warm") ? "Thank you so much" : "Thank you"} for choosing ${client}. We are glad ${detail} stood out, and we appreciate you taking the time to share your experience.`;
+
+    return {
+      stars,
+      reviewText,
+      risk,
+      reply
+    };
+  });
+
+  const normalReplies = parsedReviews.filter((review) => review.risk === "Normal");
+  const approvalReplies = parsedReviews.filter((review) => review.risk === "Approval");
+  const escalations = parsedReviews.filter((review) => review.risk === "Escalate");
+  const postDrafts = postTopics.map((topic) => {
+    const safeTopic = escapeHtml(topic);
+    return {
+      topic: safeTopic,
+      hook: `${client}: ${safeTopic}`,
+      value: `If ${safeTopic} is on your list, ${client} can help keep the job simple and practical. Our team focuses on clear communication, careful work, and a clean finish for local customers.`,
+      cta: "Call Now"
+    };
+  });
+  const weeklyNote = [
+    `${client} weekly batch prepared for ${agency}.`,
+    `${parsedReviews.length} review${parsedReviews.length === 1 ? "" : "s"} processed: ${normalReplies.length} normal, ${approvalReplies.length} approval-needed, ${escalations.length} escalated.`,
+    `${postDrafts.length} Google profile post draft${postDrafts.length === 1 ? "" : "s"} prepared.`,
+    operatorNote
+  ].filter(Boolean).join(" ");
+
+  fulfillmentBatchOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">Weekly fulfillment batch</span>
+      <button class="tool-button" type="button" data-copy-target="fulfillmentBatchOutput">Copy Batch</button>
+    </div>
+    <div class="copy-document">
+      <h4>Weekly Fulfillment Batch for ${client}</h4>
+      <p><strong>Prepared for:</strong> ${agency}</p>
+      <p><strong>Business type:</strong> ${businessType}. <strong>Tone:</strong> ${tone}.</p>
+      <h4>Review reply drafts</h4>
+      <ul>
+        ${parsedReviews.map((review, index) => `<li><strong>Review ${index + 1} (${review.stars} stars, ${review.risk}):</strong> ${review.reply}<br><em>Source review:</em> ${review.reviewText}</li>`).join("")}
+      </ul>
+      <h4>Escalation notes</h4>
+      <ul>
+        ${escalations.length ? escalations.map((review, index) => `<li><strong>Escalation ${index + 1}:</strong> ${review.stars}-star review requires approval before public use. Do not mention refunds, private details, legal issues, or blame unless the owner confirms the facts.</li>`).join("") : "<li>No high-risk reviews in this batch.</li>"}
+      </ul>
+      <h4>Google profile post drafts</h4>
+      <ul>
+        ${postDrafts.map((post) => `<li><strong>${post.hook}</strong><br>${post.value}<br><strong>CTA:</strong> ${post.cta}<br><strong>Link:</strong> [agency/client link]</li>`).join("")}
+      </ul>
+      <h4>Weekly agency update</h4>
+      <p>Hi ${agency}, this week&apos;s ${client} reputation batch is ready: ${parsedReviews.length} review draft${parsedReviews.length === 1 ? "" : "s"}, ${escalations.length} escalation flag${escalations.length === 1 ? "" : "s"}, and ${postDrafts.length} Google profile post draft${postDrafts.length === 1 ? "" : "s"}. Please review any approval-needed items before public use.</p>
+      <h4>Tracker note</h4>
+      <pre class="csv-output">${escapeHtml(weeklyNote)}</pre>
     </div>
   `;
 });
