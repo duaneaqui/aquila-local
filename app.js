@@ -1545,7 +1545,7 @@ if (pilotFitForm && pilotFitOutput) pilotFitForm.addEventListener("submit", (eve
   score = Math.min(100, score);
   const fit = score >= 80 ? "Strong pilot fit" : score >= 60 ? "Good fit for a narrow test" : "Needs a tighter first client";
   const subject = encodeURIComponent(`Aquila Local pilot fit - ${agency}`);
-  const body = encodeURIComponent([
+  const emailBodyText = [
     "Hi Aquila Local,",
     "",
     "I completed the pilot fit check and want to explore the founding pilot.",
@@ -1561,12 +1561,15 @@ if (pilotFitForm && pilotFitOutput) pilotFitForm.addEventListener("submit", (eve
     "Please send the next step for testing one client location.",
     "",
     "Thanks"
-  ].join("\n"));
+  ].join("\n");
+  const body = encodeURIComponent(emailBodyText);
   const mailto = `mailto:aquila.local@gmail.com?subject=${subject}&body=${body}`;
+  const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=aquila.local@gmail.com&su=${subject}&body=${body}`;
 
   pilotFitOutput.innerHTML = `
     <div class="output-actions">
       <span class="report-label">Pilot fit result</span>
+      <button class="tool-button" type="button" data-copy-target="pilotFitOutput">Copy Request</button>
     </div>
     <div class="copy-document">
       <div class="score-meter compact-meter">
@@ -1579,7 +1582,13 @@ if (pilotFitForm && pilotFitOutput) pilotFitForm.addEventListener("submit", (eve
       <ul>
         ${reasons.map((reason) => `<li>${reason}</li>`).join("")}
       </ul>
-      <p><a class="primary-button inline-mail-button" href="${mailto}">Send Pilot Request</a></p>
+      <h4>Pilot request message</h4>
+      <pre class="csv-output">${escapeHtml(emailBodyText)}</pre>
+      <p class="mail-actions">
+        <a class="primary-button inline-mail-button" href="${mailto}">Open Email App</a>
+        <a class="secondary-button inline-mail-button" href="${gmail}" target="_blank" rel="noopener">Open Gmail Draft</a>
+      </p>
+      <p><strong>Note:</strong> The site cannot send email by itself. These buttons open a draft, then you review and send it from your email account.</p>
     </div>
   `;
 });
