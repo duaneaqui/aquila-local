@@ -512,6 +512,8 @@ if (auditForm && auditOutput) auditForm.addEventListener("submit", (event) => {
   const competitorReviews = Number(data.get("competitorReviews"));
   const freshness = Number(data.get("freshness"));
   const coverage = escapeHtml(data.get("coverage"));
+  const postActivity = escapeHtml(data.get("postActivity") || "no recent Google posts found");
+  const urgency = escapeHtml(data.get("urgency") || "high-intent local service");
   const packageName = escapeHtml(data.get("package"));
   const freshnessRisk = freshness > 30 ? "a visible review freshness gap" : "a decent review freshness signal";
   const ratingRisk = rating < 4.5 ? "rating improvement room" : "a strong rating worth protecting";
@@ -520,40 +522,74 @@ if (auditForm && auditOutput) auditForm.addEventListener("submit", (event) => {
   const competitorLine = competitorGap > 0
     ? `The nearest visible competitor has ${competitorReviews} reviews, leaving a ${competitorGap}-review proof gap.`
     : "The business is not behind on review volume, so the fastest win is freshness and response quality.";
+  const coverageIsWeak = coverage.includes("unanswered") || coverage.includes("some");
+  const postIsWeak = !postActivity.includes("active");
+  const highFrictionNiches = ["pest control", "lawn care", "mobile auto detailer"];
+  const isHighFriction = highFrictionNiches.some((phrase) => niche.includes(phrase));
+  const trustGaps = [
+    `Freshness: ${freshness} days since the latest review creates ${freshness > 30 ? "a stale first impression" : "a signal worth protecting before it slips"}.`,
+    `Reply coverage: ${coverage} replies ${coverageIsWeak ? "makes maintenance an easy agency add-on" : "is already solid, so the angle is consistency and reporting"}.`,
+    `Proof gap: ${competitorGap} fewer reviews than the top visible competitor.`,
+    `Google post activity: ${postActivity}, which ${postIsWeak ? "leaves a simple weekly content gap" : "can be folded into a monthly proof report"}.`
+  ];
+  const workflow = [
+    "Draft owner-style replies for new reviews and flag low-star reviews for human approval.",
+    "Prepare one weekly Google profile post draft tied to service demand, seasonality, or trust proof.",
+    "Send a monthly white-label activity report the agency can forward under its own brand.",
+    "Track review count, rating, freshness, reply coverage, post cadence, and next suggested action."
+  ];
+  const riskFlags = [
+    rating < 4.2 ? "Rating under 4.2: avoid aggressive sales language; position the service as trust recovery and owner-approved response support." : "",
+    freshness > 45 ? "Freshness gap over 45 days: lead with profile maintenance, not ranking promises." : "",
+    competitorGap > 75 ? "Large competitor proof gap: frame this as a long-term proof-building support system, not an overnight fix." : "",
+    isHighFriction ? "Higher-friction niche: complaints can involve appointments, damage, pests, weather, or service quality; keep negative reviews approval-only." : "",
+    urgency.includes("lower") ? "Lower urgency service: outreach should emphasize retention and professionalism more than emergency buyer behavior." : ""
+  ].filter(Boolean);
+  const shortRiskFlags = riskFlags.length ? riskFlags : ["No major red flags. Keep claims conservative and make the audit useful before asking for a call."];
+  const auditHeadline = `${agency} can add a white-label reputation desk for ${niche} clients.`;
+  const trackerNotes = [
+    `Audit v2: ${niche}; ${rating.toFixed(1)} rating; ${reviewsCount} reviews; ${freshness} days since latest review; ${coverage}; ${postActivity}; competitor gap ${competitorGap}.`,
+    `Angle: offer a white-label trust desk with review reply drafts, weekly Google post drafts, escalation flags, and monthly reporting.`,
+    `Suggested package: ${packageName}.`
+  ].join(" ");
 
   auditOutput.innerHTML = `
     <div class="output-actions">
-      <span class="report-label">Outreach asset preview</span>
+      <span class="report-label">Sample Audit Generator v2</span>
       <button class="tool-button" type="button" data-copy-target="auditOutput">Copy All</button>
     </div>
     <div class="audit-document">
-      <h3>${agency} can turn review maintenance into a simple monthly retainer.</h3>
+      <h3>${auditHeadline}</h3>
       <p><strong>Prospect:</strong> ${website}</p>
       <p>
-        A ${niche} with ${reviewsCount} reviews, a ${rating.toFixed(1)} rating, ${coverage} replies, and ${freshness} days since the latest review has ${freshnessRisk}, ${ratingRisk}, and ${reviewRisk}. ${competitorLine}
+        A ${niche} with ${reviewsCount} reviews, a ${rating.toFixed(1)} rating, ${coverage} replies, ${freshness} days since the latest review, and ${postActivity} has ${freshnessRisk}, ${ratingRisk}, and ${reviewRisk}. ${competitorLine}
       </p>
       <h4>Trust gaps</h4>
       <ul>
-        <li>Freshness: ${freshness} days since the latest review makes the business look less active.</li>
-        <li>Response coverage: ${coverage} replies creates an easy service add-on for the agency.</li>
-        <li>Proof gap: ${competitorGap} fewer reviews than the top visible competitor.</li>
+        ${trustGaps.map((gap) => `<li>${gap}</li>`).join("")}
       </ul>
-      <h4>Recommended workflow</h4>
+      <h4>Recommended monthly workflow</h4>
       <ul>
-        <li>Reply to every recent review with specific, owner-style responses.</li>
-        <li>Draft weekly Google profile post copy tied to the services customers are already searching for.</li>
-        <li>Send a monthly reputation activity report showing review count, freshness, response coverage, and next actions.</li>
+        ${workflow.map((step) => `<li>${step}</li>`).join("")}
+      </ul>
+      <h4>Risk flags</h4>
+      <ul>
+        ${shortRiskFlags.map((flag) => `<li>${flag}</li>`).join("")}
       </ul>
       <h4>Suggested offer</h4>
-      <p>${packageName}. Start with a bounded pilot, protect delivery with per-location limits, then add locations only when the agency has real client work to offload.</p>
+      <p>${packageName}. Start with a bounded pilot, protect delivery with per-location limits, keep negative reviews approval-only, then add locations only when the agency has real client work to offload.</p>
       <hr>
-      <h4>Email draft</h4>
+      <h4>Email-ready message</h4>
       <p>Subject: quick review trust sample for ${agency}</p>
       <p>Hi ${contact},</p>
-      <p>I noticed ${agency} works with local businesses. I made a quick sample of how a review trust desk could help one ${niche} look more current and easier to trust.</p>
-      <p>The quick issue: ${reviewsCount} reviews, a ${rating.toFixed(1)} rating, ${freshness} days since the latest review, and ${coverage} replies. ${competitorLine}</p>
-      <p>I help agencies handle this quietly under their brand: Google review reply drafts, weekly profile post drafts, and monthly reputation activity reports.</p>
+      <p>I noticed ${agency} works with local businesses. I made a quick white-label sample showing how one ${niche} could look more current and easier to trust on Google.</p>
+      <p>The quick issue: ${reviewsCount} reviews, a ${rating.toFixed(1)} rating, ${freshness} days since the latest review, ${coverage} replies, and ${postActivity}. ${competitorLine}</p>
+      <p>I help agencies handle this quietly under their brand: Google review reply drafts, weekly profile post drafts, escalation flags for risky reviews, and monthly reputation activity reports.</p>
       <p>Want me to send the full white-label sample?</p>
+      <h4>LinkedIn version</h4>
+      <p>Hi ${contact}, I noticed ${agency} serves local businesses. I put together a quick white-label trust audit for a ${niche}: ${rating.toFixed(1)} rating, ${reviewsCount} reviews, ${freshness} days since the latest review, and ${coverage} replies. Want me to send the sample?</p>
+      <h4>Tracker notes</h4>
+      <pre class="csv-output">${escapeHtml(trackerNotes)}</pre>
     </div>
   `;
 });
