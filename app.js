@@ -78,7 +78,112 @@ const releaseReadinessForm = document.querySelector("#releaseReadinessForm");
 const releaseReadinessOutput = document.querySelector("#releaseReadinessOutput");
 const pilotFitForm = document.querySelector("#pilotFitForm");
 const pilotFitOutput = document.querySelector("#pilotFitOutput");
+const folderButtons = document.querySelectorAll("[data-folder-task]");
+const folderGuideTitle = document.querySelector("#folderGuideTitle");
+const folderGuideCopy = document.querySelector("#folderGuideCopy");
+const folderGuideSteps = document.querySelector("#folderGuideSteps");
+const folderGuideTemplate = document.querySelector("#folderGuideTemplate");
+const folderGuideLink = document.querySelector("#folderGuideLink");
 const signalCanvas = document.querySelector("#signalCanvas");
+
+const folderGuides = {
+  daily: {
+    title: "Start the day",
+    copy: "Open your Google Sheet, check Daily Tasks, then use this to decide what gets your attention first.",
+    steps: [
+      "Run Aquila Local -> Build daily tasks in Google Sheets.",
+      "Work High priority rows first.",
+      "Use Founder Daily Dashboard if the day feels unclear."
+    ],
+    template: "Daily note: follow-ups due __; audits to build __; clients blocked __; fulfillment due __.",
+    link: "#dashboard",
+    linkLabel: "Open Daily Dashboard"
+  },
+  prospect: {
+    title: "Add a prospect",
+    copy: "Use this when you find a new agency that may buy white-label reputation work.",
+    steps: [
+      "Enter agency/contact details.",
+      "Score fit and only keep high or strong medium prospects.",
+      "Paste the generated row into the Prospects sheet."
+    ],
+    template: "Agency: __ | Contact: __ | Niche: __ | Score: __ | Next action: build sample audit.",
+    link: "#prospect-entry",
+    linkLabel: "Open Prospect Entry"
+  },
+  audit: {
+    title: "Create outreach asset",
+    copy: "Use this before asking for a call. The sample audit should make the service obvious.",
+    steps: [
+      "Collect public review/profile signals.",
+      "Generate the sample audit.",
+      "Send the email-ready message and update follow-up date."
+    ],
+    template: "Audit: rating __; reviews __; latest review __ days; reply coverage __; competitor gap __.",
+    link: "#audit",
+    linkLabel: "Open Audit Generator"
+  },
+  followup: {
+    title: "Follow up",
+    copy: "Use this when a prospect has been contacted and needs a next touch.",
+    steps: [
+      "Pick the current outreach stage.",
+      "Generate the next message.",
+      "Update next_follow_up and last_touch in the Prospects sheet."
+    ],
+    template: "Follow-up: agency __; stage __; last touch __; next follow-up __; reply status __.",
+    link: "#follow-up",
+    linkLabel: "Open Follow-Up Desk"
+  },
+  paid: {
+    title: "Paid client workflow",
+    copy: "Use this after someone pays. It tells you what to do without jumping between tools.",
+    steps: [
+      "Pick the current paid-client stage.",
+      "Follow the generated next actions.",
+      "Use the linked operator tool only if the command plan tells you to."
+    ],
+    template: "Paid client: agency __; client __; stage __; invoice __; access/review source __.",
+    link: "#paid-client-command",
+    linkLabel: "Open Paid Client Command"
+  },
+  fulfillment: {
+    title: "Build fulfillment batch",
+    copy: "Use this when you have reviews and post topics ready for a paid client.",
+    steps: [
+      "Paste reviews as star rating plus review text.",
+      "Add post topics.",
+      "Review all outputs manually before sending to the agency."
+    ],
+    template: "Batch: 5 | __\n3 | __\n1 | __\nPost topics: __, __, __.",
+    link: "#fulfill",
+    linkLabel: "Open Fulfillment Batch"
+  },
+  status: {
+    title: "Check client status",
+    copy: "Use this when you are not sure whether a client is paid, blocked, active, or due.",
+    steps: [
+      "Enter invoice, access, and service status.",
+      "Resolve blockers before fulfillment.",
+      "Paste updates into Clients and Invoices sheets."
+    ],
+    template: "Status: invoice __; access __; service __; blocker __; next due __.",
+    link: "#client-status",
+    linkLabel: "Open Client Status"
+  },
+  import: {
+    title: "Review tracker rows",
+    copy: "Use this when your Google Sheet or CSV has rows and you want to see what needs action.",
+    steps: [
+      "Paste rows from Prospects, Clients, or Invoices.",
+      "Analyze the rows.",
+      "Use the recommended next operator tool."
+    ],
+    template: "Paste tracker rows here, then check due follow-ups, blockers, invoices, or fulfillment tasks.",
+    link: "#data-import",
+    linkLabel: "Open Data Import"
+  }
+};
 
 function escapeHtml(value) {
   return String(value)
@@ -180,6 +285,18 @@ function renderAgents() {
       <p>${purpose}</p>
     </article>
   `).join("");
+}
+
+function renderFolderGuide(taskName = "daily") {
+  const guide = folderGuides[taskName] || folderGuides.daily;
+  if (!folderGuideTitle || !folderGuideCopy || !folderGuideSteps || !folderGuideTemplate || !folderGuideLink) return;
+
+  folderGuideTitle.textContent = guide.title;
+  folderGuideCopy.textContent = guide.copy;
+  folderGuideSteps.innerHTML = guide.steps.map((step) => `<li>${step}</li>`).join("");
+  folderGuideTemplate.textContent = guide.template;
+  folderGuideLink.setAttribute("href", guide.link);
+  folderGuideLink.textContent = guide.linkLabel;
 }
 
 function initSignalCanvas() {
@@ -330,6 +447,13 @@ if (buildReport && reportPreview) buildReport.addEventListener("click", () => {
       <strong>7</strong>
     </div>
   `;
+});
+
+folderButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    folderButtons.forEach((item) => item.classList.toggle("active", item === button));
+    renderFolderGuide(button.dataset.folderTask);
+  });
 });
 
 if (dailyDashboardForm && dailyDashboardOutput) dailyDashboardForm.addEventListener("submit", (event) => {
@@ -1788,3 +1912,4 @@ initSignalCanvas();
 initMotion();
 if (reviewList) renderReviews(reviews);
 if (agentGrid) renderAgents();
+renderFolderGuide();

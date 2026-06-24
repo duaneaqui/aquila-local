@@ -315,9 +315,78 @@ h1 {
   background: #eef5f0;
 }
 
+.folder-section {
+  background: #f7faf8;
+}
+
 .section-heading {
   max-width: 780px;
   margin-bottom: 34px;
+}
+
+.folder-shell {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: clamp(18px, 4vw, 34px);
+}
+
+.folder-tabs,
+.folder-guide {
+  border: 1px solid #cad9d1;
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 12px 30px rgba(20, 34, 29, 0.06);
+}
+
+.folder-tabs {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 14px;
+}
+
+.folder-tab {
+  width: 100%;
+  padding: 12px 14px;
+  color: var(--muted);
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.folder-tab.active,
+.folder-tab:hover {
+  color: var(--green-dark);
+  border-color: #b7cec2;
+  background: var(--mint);
+}
+
+.folder-guide {
+  padding: clamp(22px, 4vw, 36px);
+}
+
+.folder-guide h3 {
+  max-width: 760px;
+  font-size: clamp(1.45rem, 3vw, 2.25rem);
+  line-height: 1.08;
+}
+
+.folder-guide h4 {
+  margin: 22px 0 8px;
+  font-size: 1rem;
+}
+
+.folder-guide p,
+.folder-guide ul {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.folder-guide ul {
+  display: grid;
+  gap: 10px;
+  padding-left: 20px;
 }
 
 .compact-heading {
@@ -959,6 +1028,7 @@ h1 {
 
   .signal-strip,
   .split-section,
+  .folder-shell,
   .dashboard-shell,
   .founder-dashboard,
   .audit-builder,

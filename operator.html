@@ -151,6 +151,44 @@
         </div>
       </section>
 
+      <section id="task-folder" class="section folder-section">
+        <div class="section-heading">
+          <p class="eyebrow">Task folder</p>
+          <h2>Choose the job, then fill the matching template.</h2>
+          <p>
+            Start here when the operator page feels too long. Pick the folder for the task you are doing, follow the guide, then jump to the exact tool only when needed.
+          </p>
+        </div>
+
+        <div class="folder-shell">
+          <div class="folder-tabs" aria-label="Task folders">
+            <button class="folder-tab active" type="button" data-folder-task="daily">Start Day</button>
+            <button class="folder-tab" type="button" data-folder-task="prospect">Prospect</button>
+            <button class="folder-tab" type="button" data-folder-task="audit">Audit</button>
+            <button class="folder-tab" type="button" data-folder-task="followup">Follow-Up</button>
+            <button class="folder-tab" type="button" data-folder-task="paid">Paid Client</button>
+            <button class="folder-tab" type="button" data-folder-task="fulfillment">Fulfillment</button>
+            <button class="folder-tab" type="button" data-folder-task="status">Status</button>
+            <button class="folder-tab" type="button" data-folder-task="import">Import</button>
+          </div>
+
+          <article class="folder-guide">
+            <span class="report-label">Current guide</span>
+            <h3 id="folderGuideTitle">Start the day</h3>
+            <p id="folderGuideCopy">Open your Google Sheet, check Daily Tasks, then use this to decide what gets your attention first.</p>
+            <h4>Steps</h4>
+            <ul id="folderGuideSteps">
+              <li>Run Aquila Local - Build daily tasks in Google Sheets.</li>
+              <li>Work High priority rows first.</li>
+              <li>Use Founder Daily Dashboard if the day feels unclear.</li>
+            </ul>
+            <h4>Template to fill</h4>
+            <pre class="csv-output" id="folderGuideTemplate">Daily note: follow-ups due __; audits to build __; clients blocked __; fulfillment due __.</pre>
+            <a class="primary-button inline-mail-button" id="folderGuideLink" href="#dashboard">Open Daily Dashboard</a>
+          </article>
+        </div>
+      </section>
+
       <section id="dashboard" class="section dashboard-section">
         <div class="section-heading">
           <p class="eyebrow">Founder daily dashboard</p>
