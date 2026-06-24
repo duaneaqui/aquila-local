@@ -68,6 +68,8 @@ const intakeForm = document.querySelector("#intakeForm");
 const intakeOutput = document.querySelector("#intakeOutput");
 const clientStatusForm = document.querySelector("#clientStatusForm");
 const clientStatusOutput = document.querySelector("#clientStatusOutput");
+const launchChecklistForm = document.querySelector("#launchChecklistForm");
+const launchChecklistOutput = document.querySelector("#launchChecklistOutput");
 const signalCanvas = document.querySelector("#signalCanvas");
 
 function escapeHtml(value) {
@@ -1207,6 +1209,97 @@ if (clientStatusForm && clientStatusOutput) clientStatusForm.addEventListener("s
       </ul>
       <h4>Tracker note</h4>
       <pre class="csv-output">${escapeHtml(invoiceTrackerNote)}</pre>
+    </div>
+  `;
+});
+
+if (launchChecklistForm && launchChecklistOutput) launchChecklistForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(launchChecklistForm);
+  const stage = data.get("stage");
+  const name = escapeHtml(data.get("name"));
+  const concern = escapeHtml(data.get("concern") || "");
+  const stageLabels = {
+    outreach: "Before outreach",
+    invoice: "Before invoice",
+    fulfillment: "Before fulfillment",
+    renewal: "Before renewal"
+  };
+  const stageTools = {
+    outreach: "Prospect Entry, Prospect Score, and Sample Audit Generator v2",
+    invoice: "First Client Onboarding Builder and PayPal invoice draft",
+    fulfillment: "Client Status Tracker and Fulfillment Batch Builder",
+    renewal: "Monthly Report Generator and Client Status Tracker"
+  };
+  const checks = [
+    ["targetFit", "Target fits small U.S. local agency profile"],
+    ["auditReady", "Useful sample audit or clear client need exists"],
+    ["noBadClaims", "No ranking, fake review, or removal promises"],
+    ["scopeBounded", "Scope is bounded by package, locations, and review limits"],
+    ["paymentReady", "Payment/invoice path is ready or paid"],
+    ["authorization", "Agency/client authorization is confirmed"],
+    ["accessReady", "GBP access or review export workflow is ready"],
+    ["approvalOwner", "Approval owner and escalation rules are confirmed"],
+    ["trackersUpdated", "Relevant trackers are updated"],
+    ["deliveryReviewed", "Prior delivery/results reviewed for renewal"]
+  ];
+  const requiredByStage = {
+    outreach: ["targetFit", "auditReady", "noBadClaims", "trackersUpdated"],
+    invoice: ["targetFit", "scopeBounded", "paymentReady", "noBadClaims", "trackersUpdated"],
+    fulfillment: ["paymentReady", "authorization", "accessReady", "approvalOwner", "scopeBounded", "trackersUpdated"],
+    renewal: ["deliveryReviewed", "scopeBounded", "noBadClaims", "trackersUpdated"]
+  };
+  const required = requiredByStage[stage] || requiredByStage.outreach;
+  const missing = required
+    .filter((name) => !data.get(name))
+    .map((field) => checks.find(([key]) => key === field)?.[1] || field);
+  const completeOptional = checks.filter(([field]) => data.get(field)).length;
+  const verdict = missing.length
+    ? "Pause"
+    : stage === "fulfillment" || stage === "invoice"
+      ? "Proceed carefully"
+      : "Proceed";
+  const nextAction = missing.length
+    ? `Fix the missing gate first: ${missing[0]}.`
+    : stage === "outreach"
+      ? "Send audit-first outreach and update the prospect tracker after the touch."
+      : stage === "invoice"
+        ? "Send the invoice, record the invoice row, and wait for payment before fulfillment."
+        : stage === "fulfillment"
+          ? "Build the fulfillment batch, flag risky reviews, and send the agency approval update."
+          : "Send the monthly report, ask for renewal decision, testimonial, anonymized sample, or referral.";
+
+  launchChecklistOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">SOP verdict</span>
+      <button class="tool-button" type="button" data-copy-target="launchChecklistOutput">Copy SOP</button>
+    </div>
+    <div class="copy-document">
+      <div class="score-meter compact-meter">
+        <strong>${verdict}</strong>
+        <span>${stageLabels[stage]}</span>
+      </div>
+      <h4>${stageLabels[stage]} gate check for ${name}</h4>
+      <p><strong>Use next:</strong> ${stageTools[stage]}.</p>
+      <p><strong>Next action:</strong> ${nextAction}</p>
+      <h4>Required blockers</h4>
+      <ul>
+        ${missing.length ? missing.map((item) => `<li>${item}</li>`).join("") : "<li>No required blockers for this stage.</li>"}
+      </ul>
+      <h4>Rules that must stay true</h4>
+      <ul>
+        <li>Do not start fulfillment before payment and intake details are received.</li>
+        <li>Do not request or store client passwords.</li>
+        <li>Risky reviews require approval before public use.</li>
+        <li>Never create fake reviews, buy reviews, suppress legitimate reviews, or guarantee rankings.</li>
+        <li>Keep manual delivery until there is proof the offer sells and can be fulfilled within the time budget.</li>
+      </ul>
+      <h4>Checklist score</h4>
+      <p>${completeOptional} of ${checks.length} total checks marked complete. Required checks for this stage: ${required.length - missing.length} of ${required.length}.</p>
+      <h4>Concern</h4>
+      <p>${concern}</p>
+      <h4>Tracker note</h4>
+      <pre class="csv-output">${escapeHtml(`SOP ${formatDate(new Date())}: stage=${stageLabels[stage]}; verdict=${verdict}; missing=${missing.length ? missing.join("; ") : "none"}; next=${nextAction}`)}</pre>
     </div>
   `;
 });

@@ -677,6 +677,12 @@ h1 {
   gap: clamp(18px, 4vw, 34px);
 }
 
+.sop-builder {
+  display: grid;
+  grid-template-columns: minmax(280px, 460px) minmax(0, 1fr);
+  gap: clamp(18px, 4vw, 34px);
+}
+
 .onboard-builder {
   display: grid;
 }
@@ -882,6 +888,7 @@ h1 {
   .onboard-builder,
   .batch-builder,
   .status-builder,
+  .sop-builder,
   .fulfill-grid,
   .pricing-grid,
   .report-preview {

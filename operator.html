@@ -960,6 +960,63 @@ same-week exterior cleaning openings</textarea>
         </div>
       </section>
 
+      <section id="launch-checklist" class="section onboard-section">
+        <div class="section-heading">
+          <p class="eyebrow">Owner SOP</p>
+          <h2>Run the gate check before outreach, invoice, fulfillment, or renewal.</h2>
+          <p>
+            Use this when you are about to move a prospect or client forward. It keeps the business simple, approval-safe, and honest.
+          </p>
+        </div>
+
+        <div class="sop-builder">
+          <form class="mini-form" id="launchChecklistForm">
+            <h3>Launch Checklist Builder</h3>
+            <label>
+              Workflow stage
+              <select name="stage">
+                <option value="outreach">Before outreach</option>
+                <option value="invoice">Before invoice</option>
+                <option value="fulfillment">Before fulfillment</option>
+                <option value="renewal">Before renewal</option>
+              </select>
+            </label>
+            <label>
+              Agency or client name
+              <input name="name" type="text" value="BrightRoute Media" required>
+            </label>
+            <div class="checkbox-grid" aria-label="Launch gate checks">
+              <label><input name="targetFit" type="checkbox" checked> Target fits small U.S. local agency profile</label>
+              <label><input name="auditReady" type="checkbox" checked> Useful sample audit or clear client need exists</label>
+              <label><input name="noBadClaims" type="checkbox" checked> No ranking, fake review, or removal promises</label>
+              <label><input name="scopeBounded" type="checkbox" checked> Scope is bounded by package, locations, and review limits</label>
+              <label><input name="paymentReady" type="checkbox"> Payment/invoice path is ready or paid</label>
+              <label><input name="authorization" type="checkbox"> Agency/client authorization is confirmed</label>
+              <label><input name="accessReady" type="checkbox"> GBP access or review export workflow is ready</label>
+              <label><input name="approvalOwner" type="checkbox"> Approval owner and escalation rules are confirmed</label>
+              <label><input name="trackersUpdated" type="checkbox"> Relevant trackers are updated</label>
+              <label><input name="deliveryReviewed" type="checkbox"> Prior delivery/results reviewed for renewal</label>
+            </div>
+            <label>
+              Current concern
+              <textarea name="concern" rows="4">No major concern. Keep manual delivery tight and approval-safe.</textarea>
+            </label>
+            <button class="primary-button form-button" type="submit">Build SOP Verdict</button>
+          </form>
+
+          <article class="tool-output" id="launchChecklistOutput" aria-live="polite">
+            <div class="output-actions">
+              <span class="report-label">SOP verdict</span>
+              <button class="tool-button" type="button" data-copy-target="launchChecklistOutput">Copy SOP</button>
+            </div>
+            <div class="copy-document">
+              <h4>Owner SOP Gate Check</h4>
+              <p>Choose a workflow stage and complete the gate checks before moving forward.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="pricing" class="section pricing-section">
         <div class="section-heading">
           <p class="eyebrow">Simple pricing</p>
