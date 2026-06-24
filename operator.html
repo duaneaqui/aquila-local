@@ -876,6 +876,84 @@ same-week exterior cleaning openings</textarea>
         </div>
       </section>
 
+      <section id="paid-client-command" class="section score-section">
+        <div class="section-heading">
+          <p class="eyebrow">Paid client command center</p>
+          <h2>One screen for what to do after a client pays.</h2>
+          <p>
+            Use this instead of deciding which tool to open first. Pick the current stage and it gives you the next actions, message, tracker updates, and the exact operator tool to use.
+          </p>
+        </div>
+
+        <div class="command-builder">
+          <form class="mini-form" id="paidClientCommandForm">
+            <h3>Paid Client Workflow</h3>
+            <label>
+              Agency name
+              <input name="agency" type="text" value="BrightRoute Media" required>
+            </label>
+            <label>
+              Contact first name
+              <input name="contact" type="text" value="Jordan" required>
+            </label>
+            <label>
+              Client business
+              <input name="client" type="text" value="Northline Pressure Washing" required>
+            </label>
+            <label>
+              Current stage
+              <select name="stage">
+                <option value="paid">Payment received</option>
+                <option value="intakeWaiting">Waiting for intake/access</option>
+                <option value="readyBatch">Ready for first batch</option>
+                <option value="batchSent">Approval batch sent</option>
+                <option value="weekly">Weekly update due</option>
+                <option value="monthly">Monthly report due</option>
+                <option value="renewal">Renewal decision due</option>
+              </select>
+            </label>
+            <label>
+              Invoice status
+              <select name="invoiceStatus">
+                <option>Paid</option>
+                <option>Sent</option>
+                <option>Draft</option>
+                <option>Overdue</option>
+              </select>
+            </label>
+            <label>
+              Access / review source
+              <select name="accessStatus">
+                <option>Review export received</option>
+                <option>Manager access granted</option>
+                <option>Waiting for review export</option>
+                <option>Manager access pending</option>
+              </select>
+            </label>
+            <label>
+              Batch counts
+              <input name="batchCounts" type="text" value="3 reviews, 1 escalation, 3 post drafts">
+            </label>
+            <label>
+              Current note
+              <textarea name="note" rows="4">First paid pilot. Keep everything approval-safe and Google-first.</textarea>
+            </label>
+            <button class="primary-button form-button" type="submit">Build Next Steps</button>
+          </form>
+
+          <article class="tool-output" id="paidClientCommandOutput" aria-live="polite">
+            <div class="output-actions">
+              <span class="report-label">Paid client command plan</span>
+              <button class="tool-button" type="button" data-copy-target="paidClientCommandOutput">Copy Plan</button>
+            </div>
+            <div class="copy-document">
+              <h4>Paid Client Command Plan</h4>
+              <p>Choose the current stage to get the exact next steps and message to send.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="client-status" class="section score-section">
         <div class="section-heading">
           <p class="eyebrow">Client status tracker</p>

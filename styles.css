@@ -737,6 +737,12 @@ h1 {
   gap: clamp(18px, 4vw, 34px);
 }
 
+.command-builder {
+  display: grid;
+  grid-template-columns: minmax(280px, 440px) minmax(0, 1fr);
+  gap: clamp(18px, 4vw, 34px);
+}
+
 .sop-builder {
   display: grid;
   grid-template-columns: minmax(280px, 460px) minmax(0, 1fr);
@@ -961,6 +967,7 @@ h1 {
   .fit-builder,
   .batch-builder,
   .status-builder,
+  .command-builder,
   .sop-builder,
   .data-builder,
   .release-builder,

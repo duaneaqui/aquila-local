@@ -66,6 +66,8 @@ const monthlyReportForm = document.querySelector("#monthlyReportForm");
 const monthlyReportOutput = document.querySelector("#monthlyReportOutput");
 const intakeForm = document.querySelector("#intakeForm");
 const intakeOutput = document.querySelector("#intakeOutput");
+const paidClientCommandForm = document.querySelector("#paidClientCommandForm");
+const paidClientCommandOutput = document.querySelector("#paidClientCommandOutput");
 const clientStatusForm = document.querySelector("#clientStatusForm");
 const clientStatusOutput = document.querySelector("#clientStatusOutput");
 const launchChecklistForm = document.querySelector("#launchChecklistForm");
@@ -1164,6 +1166,172 @@ if (intakeForm && intakeOutput) intakeForm.addEventListener("submit", (event) =>
       <pre class="csv-output">${escapeHtml(clientLocationRow)}</pre>
       <h4>invoice-tracker.csv row</h4>
       <pre class="csv-output">${escapeHtml(invoiceRow)}</pre>
+    </div>
+  `;
+});
+
+if (paidClientCommandForm && paidClientCommandOutput) paidClientCommandForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(paidClientCommandForm);
+  const agency = escapeHtml(data.get("agency"));
+  const contact = escapeHtml(data.get("contact"));
+  const client = escapeHtml(data.get("client"));
+  const stage = data.get("stage");
+  const invoiceStatus = escapeHtml(data.get("invoiceStatus"));
+  const accessStatus = escapeHtml(data.get("accessStatus"));
+  const batchCounts = escapeHtml(data.get("batchCounts") || "");
+  const note = escapeHtml(data.get("note") || "");
+  const today = formatDate(new Date());
+
+  const stagePlans = {
+    paid: {
+      label: "Payment received",
+      useTool: "First Client Onboarding Builder",
+      status: "Onboarding",
+      tasks: [
+        "Send the welcome/intake email.",
+        "Create or update the Clients and Invoices tracker rows.",
+        "Do not draft fulfillment until intake details and access/review export are available."
+      ],
+      message: [
+        `Hi ${contact}, payment received. Thank you.`,
+        `I will set up the pilot for ${client}. Please send the review export or manager access, preferred brand tone, service areas, key offers, words to avoid, and the approval owner for replies.`,
+        "Risky reviews will be flagged for approval before any public response is used."
+      ]
+    },
+    intakeWaiting: {
+      label: "Waiting for intake/access",
+      useTool: "Client Status Tracker",
+      status: "Blocked - waiting for intake",
+      tasks: [
+        "Check what is missing: review export, manager access, tone, approval owner, or report recipient.",
+        "Send one clear reminder to the agency.",
+        "Keep fulfillment paused until the missing item is received."
+      ],
+      message: [
+        `Hi ${contact}, quick setup note for ${client}.`,
+        `I can prepare the first batch as soon as I have the review export or manager access plus the preferred tone and approval owner.`,
+        "No rush on extras; those are the only pieces needed to start safely."
+      ]
+    },
+    readyBatch: {
+      label: "Ready for first batch",
+      useTool: "Fulfillment Batch Builder",
+      status: "Ready for first batch",
+      tasks: [
+        "Paste review export into Fulfillment Batch Builder.",
+        "Draft replies, escalation notes, and Google profile post drafts.",
+        "Manually review every output before sending the approval batch."
+      ],
+      message: [
+        `Hi ${contact}, I have what I need for ${client}.`,
+        "I will prepare the first approval batch next: review reply drafts, any escalation notes, and Google profile post drafts.",
+        "I will flag approval-needed items clearly before anything public is used."
+      ]
+    },
+    batchSent: {
+      label: "Approval batch sent",
+      useTool: "Follow-Up Desk",
+      status: "Approval batch sent",
+      tasks: [
+        "Wait 2 to 3 days for approval or edits.",
+        "If no reply, follow up with a tone/approval question.",
+        "Track what was approved, revised, or blocked."
+      ],
+      message: [
+        `Hi ${contact}, quick follow-up on the approval batch for ${client}.`,
+        "Do the drafts look close to the tone you want, or should I adjust anything before the next batch?"
+      ]
+    },
+    weekly: {
+      label: "Weekly update due",
+      useTool: "Fulfillment Batch Builder",
+      status: "Active",
+      tasks: [
+        "Summarize this week&apos;s drafts, escalations, and post drafts.",
+        "Send a short agency update.",
+        "Update Clients notes and mark Daily Tasks complete."
+      ],
+      message: [
+        `Hi ${contact}, quick weekly update for ${client}:`,
+        `${batchCounts || "Review reply drafts and profile post drafts were prepared this week."}`,
+        "Approval-needed items remain flagged before public use."
+      ]
+    },
+    monthly: {
+      label: "Monthly report due",
+      useTool: "Monthly Report Generator",
+      status: "Monthly report due",
+      tasks: [
+        "Count new reviews, replies drafted, post drafts, and escalations.",
+        "Build the monthly report.",
+        "Send the report with the next month recommendation."
+      ],
+      message: [
+        `Hi ${contact}, the monthly reputation activity report for ${client} is ready.`,
+        "It summarizes review replies drafted, Google profile post drafts, escalation items, and recommended next steps."
+      ]
+    },
+    renewal: {
+      label: "Renewal decision due",
+      useTool: "Monthly Report Generator + PayPal Invoice",
+      status: "Renewal pending",
+      tasks: [
+        "Send the monthly report first.",
+        "Ask whether they want to continue at $299/month.",
+        "If yes, send the next PayPal invoice before the next service period."
+      ],
+      message: [
+        `Hi ${contact}, the founding pilot for ${client} is almost complete.`,
+        "Would you like to continue the Review Desk next month at $299/month for up to two active locations?",
+        "If yes, I will send the next invoice and continue the same approval workflow."
+      ]
+    }
+  };
+
+  const plan = stagePlans[stage] || stagePlans.paid;
+  const blockers = [];
+  if (invoiceStatus !== "Paid") blockers.push(`Invoice is ${invoiceStatus.toLowerCase()}; do not fulfill until payment is confirmed.`);
+  if (/waiting|pending/i.test(accessStatus) && !["paid", "intakeWaiting"].includes(stage)) blockers.push(`Access/review source is not ready: ${accessStatus}.`);
+  const trackerNote = `Paid client command ${today}: ${client}; stage=${plan.label}; status=${plan.status}; use=${plan.useTool}; invoice=${invoiceStatus}; access=${accessStatus}; note=${note}`;
+
+  paidClientCommandOutput.innerHTML = `
+    <div class="output-actions">
+      <span class="report-label">Paid client command plan</span>
+      <button class="tool-button" type="button" data-copy-target="paidClientCommandOutput">Copy Plan</button>
+    </div>
+    <div class="copy-document">
+      <div class="score-meter compact-meter">
+        <strong>${blockers.length ? "Hold" : "Go"}</strong>
+        <span>${plan.label}</span>
+      </div>
+      <h4>${client}: ${plan.label}</h4>
+      <p><strong>Use next:</strong> ${plan.useTool}. <strong>Client status:</strong> ${plan.status}.</p>
+      <h4>Do this now</h4>
+      <ul>
+        ${plan.tasks.map((task) => `<li>${task}</li>`).join("")}
+      </ul>
+      <h4>Blockers</h4>
+      <ul>
+        ${blockers.length ? blockers.map((blocker) => `<li>${blocker}</li>`).join("") : "<li>No blockers from the selected inputs.</li>"}
+      </ul>
+      <h4>Message to send</h4>
+      ${plan.message.map((line) => `<p>${line}</p>`).join("")}
+      <h4>Tracker updates</h4>
+      <ul>
+        <li><strong>Clients status:</strong> ${plan.status}</li>
+        <li><strong>Invoices status:</strong> ${invoiceStatus}</li>
+        <li><strong>Daily Tasks:</strong> mark this stage as Done after sending the message or completing the batch.</li>
+      </ul>
+      <h4>Quality rules</h4>
+      <ul>
+        <li>Do not ask for passwords.</li>
+        <li>Do not start unpaid fulfillment.</li>
+        <li>Do not publish risky replies without agency/client approval.</li>
+        <li>Do not invent facts, offer refunds, or make ranking/review growth promises.</li>
+      </ul>
+      <h4>Tracker note</h4>
+      <pre class="csv-output">${escapeHtml(trackerNote)}</pre>
     </div>
   `;
 });
