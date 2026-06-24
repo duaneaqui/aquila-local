@@ -10,4 +10,4 @@ Open `index.html` in a browser.
 
 ## Deploy
 
-The intended Vercel project URL is `aquila-local.vercel.app`.
+The live Vercel project URL is `https://aquila-local-ops.vercel.app`.
